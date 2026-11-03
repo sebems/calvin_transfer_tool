@@ -94,8 +94,7 @@
         const courseCache = new Map();
         const isFresh = (timestamp) => Date.now() - timestamp < CACHE_TTL;
 
-        const getMappingId = (course, index) =>
-            String(course.course_ref_id ?? `course-${index}`);
+        const getMappingId = (course) => String(course.credit_rule_id);
 
         const getCourseLabel = (courses = []) => courses.map(c => `${c.course_id || "Unknown"} - ${c.course_title || "Untitled"}`).join(", ");
 
@@ -354,7 +353,7 @@
         // ==========================================
         const CourseCard = ({ course, index, inCart, onToggleCart }) => {
             const [expanded, setExpanded] = useState(false);
-            const courseId = getMappingId(course, index);
+            const courseId = getMappingId(course);
 
             const externalCourses = course.external_courses || [];
             const internalCourses = course.internal_courses || [];
@@ -996,7 +995,7 @@
 
                                 <div class="space-y-4">
                                     ${filteredCourses.map((course, index) => {
-                const courseId = getMappingId(course, index);
+                const courseId = getMappingId(course);
 
                 return html`<${CourseCard}
                                             key=${courseId}
