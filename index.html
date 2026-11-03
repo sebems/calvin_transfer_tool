@@ -355,7 +355,7 @@
     // ==========================================
     const CourseCard = ({ course, index, inCart, onToggleCart }) => {
       const [expanded, setExpanded] = useState(false);
-      const courseId = course.internal_courses?.[0]?.course_id || `course-${index}`;
+      const courseId = course.internal_courses?.[0]?.course_ref_id || `course-${index}`;
 
       const externalCourse = course.external_courses?.[0] || {};
       const internalCourse = course.internal_courses?.[0] || {};
