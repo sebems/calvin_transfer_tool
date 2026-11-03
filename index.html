@@ -461,16 +461,8 @@
                                                 ${c.course_title || "Equivalent Course Title"}
                                             </div>
                                         </div>
-                                    `)
-                    : html`
-                                        <div class="text-gray-500 italic">
-                                            No Calvin equivalent available.
-                                        </div>
-                                    `}
-                            </div>
-
-                            ${course.is_core
-                    ? html`
+                                                                    ${c.is_core
+                            ? html`
                                     <div class="text-xs text-gray-500 pt-3">
                                         <span>
                                             <i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>
@@ -478,7 +470,7 @@
                                         </span>
                                     </div>
                                 `
-                    : html`
+                            : html`
                                     <div class="text-xs text-gray-500 pt-3">
                                         <span>
                                             <i class="bi bi-journal-x mr-1 text-gray-400"></i>
@@ -486,7 +478,14 @@
                                         </span>
                                     </div>
                                 `
-                }
+                        }
+                                    `)
+                    : html`
+                                        <div class="text-gray-500 italic">
+                                            No Calvin equivalent available.
+                                        </div>
+                                    `}
+                            </div>
                         </div>
                     </div>
 
