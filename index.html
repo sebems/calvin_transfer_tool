@@ -1,51 +1,56 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Calvin Transfer Tool</title>
-    <link rel="icon" href="https://calvin.edu/sites/default/files/favicon_0.ico" type="image/vnd.microsoft.icon">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Calvin Transfer Tool</title>
+        <link rel="icon"
+            href="https://calvin.edu/sites/default/files/favicon_0.ico"
+            type="image/vnd.microsoft.icon">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        calvin: {
-                            maroon: '#8c2232',
-                            darkMaroon: '#6e232c',
-                            gold: '#f2cd14',
-                            darkGold: '#f3cd00',
-                            charcoal: '#282828',
-                            darkCharcoal: '#121212',
-                            footerText: '#c4c4c4'
-                        }
-                    },
-                    fontFamily: {
-                        heading: ['"Fjalla One"', 'sans-serif'],
-                        body: ['Montserrat', 'Arial', 'sans-serif']
+                colors: {
+                    calvin: {
+                    maroon: '#8c2232',
+                    darkMaroon: '#6e232c',
+                    gold: '#f2cd14',
+                    darkGold: '#f3cd00',
+                    charcoal: '#282828',
+                    darkCharcoal: '#121212',
+                    footerText: '#c4c4c4'
                     }
+                },
+                fontFamily: {
+                    heading: ['"Fjalla One"', 'sans-serif'],
+                    body: ['Montserrat', 'Arial', 'sans-serif']
+                }
                 }
             }
-        };
-    </script>
+            };
+        </script>
 
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <!-- Fonts & Icons -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-    <!-- PDF Export Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <!-- PDF Export Library -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <!-- Import Map for ESM Preact -->
-    <script type="importmap">
+        <!-- Import Map for ESM Preact -->
+        <script type="importmap">
         {
             "imports": {
                 "preact": "https://esm.sh/preact@10.19.3",
@@ -55,70 +60,85 @@
         }
     </script>
 
-    <style>
-        .st0 {
-            fill: #8c2232;
-        }
+        <style>
+    .st0 {
+      fill: #8c2232;
+    }
 
-        .st1 {
-            fill: #f2cd14;
-        }
+    .st1 {
+      fill: #f2cd14;
+    }
 
-        .st2 {
-            fill: #c32032;
-        }
+    .st2 {
+      fill: #c32032;
+    }
 
-        .st3 {
-            fill: #ffffff;
-        }
+    .st3 {
+      fill: #ffffff;
+    }
 
-        .header-gradient {
-            background: linear-gradient(180deg, #000000 0%, rgba(0, 0, 0, 0) 83.62%);
-        }
-    </style>
-</head>
+    .header-gradient {
+      background: linear-gradient(180deg, #000000 0%, rgba(0, 0, 0, 0) 83.62%);
+    }
 
-<body
-    class="bg-gray-50 text-gray-900 font-body antialiased min-h-screen flex flex-col selection:bg-calvin-gold selection:text-calvin-maroon">
+    /* Slate Request Information form fields */
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 input:not([type="checkbox"]):not([type="radio"]),
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 select,
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 textarea {
+        border: 1px solid #9ca3af !important;
+        border-radius: 4px !important;
+        background-color: #fff !important;
+        padding: 8px 10px !important;
+    }
 
-    <div id="app" class="flex flex-col min-h-screen"></div>
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 input:not([type="checkbox"]):not([type="radio"]):focus,
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 select:focus,
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 textarea:focus {
+        border-color: #8c2232 !important;
+        outline: 2px solid rgba(140, 34, 50, 0.15) !important;
+        outline-offset: 1px;
+    }
+  </style>
+    </head>
 
-    <script type="module">
-        import { html, render } from 'htm/preact';
-        import { useState, useEffect, useMemo } from 'preact/hooks';
+    <body
+        class="bg-gray-50 text-gray-900 font-body antialiased min-h-screen flex flex-col selection:bg-calvin-gold selection:text-calvin-maroon">
 
-        const CACHE_TTL = 24 * 60 * 60 * 1000;
-        const COURSE_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-courses";
-        const INSTITUTION_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-institutions";
+        <div id="app" class="flex flex-col min-h-screen"></div>
 
-        const courseCache = new Map();
-        const isFresh = (timestamp) => Date.now() - timestamp < CACHE_TTL;
+        <script type="module">
+    import { html, render } from 'htm/preact';
+    import { useState, useEffect, useMemo } from 'preact/hooks';
 
-        const getMappingId = (course) => String(course.credit_rule_id);
+    const CACHE_TTL = 24 * 60 * 60 * 1000;
+    const COURSE_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-courses";
+    const INSTITUTION_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-institutions";
 
-        const getCourseLabel = (courses = []) => courses.map(c => `${c.course_id || "Unknown"} - ${c.course_title || "Untitled"}`).join(", ");
+    const courseCache = new Map();
+    const isFresh = (timestamp) => Date.now() - timestamp < CACHE_TTL;
+    const getCourseLabel = (courses = []) => courses.map(c => `${c.course_id || "Unknown"} - ${c.course_title || "Untitled"}`).join(", ");
 
-        const stripHtml = (htmlString) => {
-            if (!htmlString) return "";
-            const doc = new DOMParser().parseFromString(htmlString, 'text/html');
-            return doc.body.textContent || "";
+    const stripHtml = (htmlString) => {
+      if (!htmlString) return "";
+      const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+      return doc.body.textContent || "";
+    };
+
+    // ==========================================
+    // HEADER COMPONENT
+    // ==========================================
+    const Header = () => {
+      const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.key === 'Escape' && isMenuOpen) setIsMenuOpen(false);
         };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [isMenuOpen]);
 
-        // ==========================================
-        // HEADER COMPONENT
-        // ==========================================
-        const Header = () => {
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-            useEffect(() => {
-                const handleKeyDown = (e) => {
-                    if (e.key === 'Escape' && isMenuOpen) setIsMenuOpen(false);
-                };
-                window.addEventListener('keydown', handleKeyDown);
-                return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [isMenuOpen]);
-
-            return html`
+      return html`
                 <header class="bg-calvin-maroon text-white relative z-50">
                     <nav class="bg-black py-2 px-4 border-b border-gray-900">
                         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs space-y-2 md:space-y-0">
@@ -138,7 +158,7 @@
 
                     <nav class="header-gradient py-4 px-4 sm:px-8">
                         <div class="max-w-7xl mx-auto flex justify-between items-center">
-                            <a href="https://calvin.edu/" class="inline-block w-44 sm:w-60">
+                            <a href="https://calvin.edu/" class="inline-block w-44 sm:w-60 focus:outline-none focus:ring-2 focus:ring-calvin-gold rounded">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1405.7 387.2" class="w-full h-auto">
                                     <path class="st0" d="M1010.5 207.2l-20-12.8v-25.6l-35.2-23.2c-3.2-1.6-5.6-2.4-6.4-1.6-1.6 1.6-2.4 4-2.4 8v55.2c0 4 0 8 2.4 10.4.8 2.4 3.2 4.8 6.4 7.2l54.4 35.2v-52.8h.8z"></path>
                                     <path class="st0" d="M1010.5 287.2l-62.4-40.8c-8-4.8-13.6-11.2-17.6-19.2s-6.4-15.2-6.4-22.4v-80c0-8 1.6-12.8 6.4-14.4 4-1.6 10.4 0 17.6 4.8l61.6 40V84.8L877.7 0v264.8l132 86.4v-64h.8z"></path>
@@ -200,13 +220,13 @@
                     </aside>
                 </header>
             `;
-        };
+    };
 
-        // ==========================================
-        // BREADCRUMB COMPONENT
-        // ==========================================
-        const Breadcrumb = () => html`
-            <div class="max-w-7xl px-4 sm:px-8 py-4">
+    // ==========================================
+    // BREADCRUMB COMPONENT
+    // ==========================================
+    const Breadcrumb = () => html`
+            <div class="max-w-7xl mx-auto px-4 sm:px-8 py-4">
                 <nav aria-label="breadcrumb">
                     <ol class="flex flex-wrap items-center space-x-2 text-xs text-gray-600 font-medium">
                         <li><a href="https://sites.calvin.edu/" class="hover:underline text-gray-800">Home</a></li>
@@ -219,10 +239,10 @@
             </div>
         `;
 
-        // ==========================================
-        // FOOTER COMPONENT
-        // ==========================================
-        const Footer = () => html`
+    // ==========================================
+    // FOOTER COMPONENT
+    // ==========================================
+    const Footer = () => html`
             <footer class="bg-calvin-charcoal text-calvin-footerText mt-16 pt-12 pb-8 text-sm">
                 <div class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     <div class="flex justify-start">
@@ -285,30 +305,30 @@
             </footer>
         `;
 
-        // ==========================================
-        // AUTOCOMPLETE COMPONENT
-        // ==========================================
-        const InstitutionAutocomplete = ({ institutions, selectedId, onChange }) => {
-            const [query, setQuery] = useState("");
-            const [isOpen, setIsOpen] = useState(false);
+    // ==========================================
+    // AUTOCOMPLETE COMPONENT
+    // ==========================================
+    const InstitutionAutocomplete = ({ institutions, selectedId, onChange }) => {
+      const [query, setQuery] = useState("");
+      const [isOpen, setIsOpen] = useState(false);
 
-            useEffect(() => {
-                if (selectedId) {
-                    const inst = institutions.find(i => String(i.ReferenceID) === String(selectedId));
-                    if (inst) setQuery(inst.InstitutionName);
-                } else {
-                    setQuery("");
-                }
-            }, [selectedId, institutions]);
+      useEffect(() => {
+        if (selectedId) {
+          const inst = institutions.find(i => String(i.ReferenceID) === String(selectedId));
+          if (inst) setQuery(inst.InstitutionName);
+        } else {
+          setQuery("");
+        }
+      }, [selectedId, institutions]);
 
-            const filteredInstitutions = useMemo(() => {
-                if (!query) return institutions;
-                return institutions.filter(inst =>
-                    inst.InstitutionName.toLowerCase().includes(query.toLowerCase())
-                );
-            }, [query, institutions]);
+      const filteredInstitutions = useMemo(() => {
+        if (!query) return institutions;
+        return institutions.filter(inst =>
+          inst.InstitutionName.toLowerCase().includes(query.toLowerCase())
+        );
+      }, [query, institutions]);
 
-            return html`
+      return html`
                 <div class="relative">
                     <input
                         type="text"
@@ -316,10 +336,10 @@
                         placeholder="Type to search institution..."
                         value=${query}
                         onInput=${e => {
-                    setQuery(e.target.value);
-                    setIsOpen(true);
-                    if (e.target.value === "") onChange("");
-                }}
+          setQuery(e.target.value);
+          setIsOpen(true);
+          if (e.target.value === "") onChange("");
+        }}
                         onFocus=${() => setIsOpen(true)}
                         onBlur=${() => setIsOpen(false)}
                     />
@@ -333,11 +353,11 @@
                                     key=${inst.ReferenceID}
                                     class=${`px-3 py-2 cursor-pointer hover:bg-calvin-maroon hover:text-white transition-colors ${String(inst.ReferenceID) === String(selectedId) ? 'bg-gray-100 font-semibold' : ''}`}
                                     onMouseDown=${(e) => {
-                        e.preventDefault();
-                        onChange(inst.ReferenceID);
-                        setQuery(inst.InstitutionName);
-                        setIsOpen(false);
-                    }}
+            e.preventDefault();
+            onChange(inst.ReferenceID);
+            setQuery(inst.InstitutionName);
+            setIsOpen(false);
+          }}
                                 >
                                     ${inst.InstitutionName}
                                 </li>
@@ -346,19 +366,19 @@
                     `}
                 </div>
             `;
-        };
+    };
 
-        // ==========================================
-        // SIDE-BY-SIDE EQUIVALENCY COURSE CARD UI
-        // ==========================================
-        const CourseCard = ({ course, index, inCart, onToggleCart }) => {
-            const [expanded, setExpanded] = useState(false);
-            const courseId = getMappingId(course);
+    // ==========================================
+    // SIDE-BY-SIDE EQUIVALENCY COURSE CARD UI
+    // ==========================================
+    const CourseCard = ({ course, index, inCart, onToggleCart }) => {
+      const [expanded, setExpanded] = useState(false);
+      const courseId = course.internal_courses?.[0]?.course_id || `course-${index}`;
 
-            const externalCourses = course.external_courses || [];
-            const internalCourses = course.internal_courses || [];
+      const externalCourse = course.external_courses?.[0] || {};
+      const internalCourse = course.internal_courses?.[0] || {};
 
-            return html`
+      return html`
                 <div class=${`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${inCart ? 'border-calvin-maroon ring-1 ring-calvin-maroon shadow-md' : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow'}`}>
 
                     <!-- Card Header / Title Bar -->
@@ -373,20 +393,12 @@
                             />
                             <div>
                                 <h3 class="font-bold text-gray-900 text-base sm:text-lg leading-snug">
-                                ${externalCourses.length
-                    ? externalCourses.map(c => c.course_id).filter(Boolean).join(" | ")
-                    : "Course Mapping"}
-
-                                <span class="text-gray-400 font-normal mx-2">→</span>
-
-                                ${internalCourses.length
-                    ? internalCourses.map(c => c.course_id).filter(Boolean).join(" | ")
-                    : "Calvin Equivalent"}
+                                    ${externalCourse.course_id || "Course Mapping"}
+                                    <span class="text-gray-400 font-normal mx-2">→</span>
+                                    ${internalCourse.course_id || "Calvin Equivalent"}
                                 </h3>
                                 <div class="flex flex-wrap items-center gap-2 mt-1">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <i class="bi bi-check-circle-fill mr-1 text-[10px]"></i> Direct Transfer
-                                    </span>
+ 
                                     ${course.core_requirement && html`
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                                             <i class="bi bi-mortarboard-fill mr-1 text-[10px]"></i> ${course.core_requirement}
@@ -404,86 +416,19 @@
                     <!-- Side-by-Side Content Grid -->
                     <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm relative">
                         <!-- Transferring Course Details -->
-                        <div class="bg-gray-50/70 p-3.5 rounded-lg border border-gray-100">
-                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 block mb-2">
-                                External Institution
-                            </span>
-
-                            <div class="space-y-3">
-                                ${externalCourses.length
-                    ? externalCourses.map((c, idx) => html`
-                                        <div
-                                            key=${c.course_ref_id ?? c.course_id ?? idx}
-                                            class=${idx > 0 ? "pt-3 border-t border-gray-200" : ""}
-                                        >
-                                            <div class="font-bold text-gray-900">
-                                                ${c.course_id || "Course"}
-                                            </div>
-                                            <div class="text-gray-700 font-medium">
-                                                ${c.course_title || "Untitled Course"}
-                                            </div>
-                                        </div>
-                                    `)
-                    : html`
-                                        <div class="text-gray-500 italic">
-                                            No external course information available.
-                                        </div>
-                                    `}
-                            </div>
-
-                            <div class="text-xs text-gray-500 pt-3 flex items-center gap-3">
-                                <span>
-                                    <i class="bi bi-award mr-1 text-calvin-maroon"></i>
-                                    Min Grade: <strong>C (2.0)</strong>
-                                </span>
-                            </div>
+                        <div class="bg-gray-50/70 p-3.5 rounded-lg border border-gray-100 space-y-1">
+                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 block mb-1">${course.institution || "External Institution"}</span>
+                            <div class="font-bold text-gray-900">${externalCourse.course_id || "Course"}</div>
+                            <div class="text-gray-700 font-medium">${externalCourse.course_title || "Untitled Course"}</div>
                         </div>
 
                         <!-- Calvin Equivalent Details -->
-                        <div class="bg-red-50/30 p-3.5 rounded-lg border border-red-100/60">
-                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-calvin-maroon block mb-2">
-                                Calvin Equivalent
-                            </span>
-
-                            <div class="space-y-3">
-                                ${internalCourses.length
-                    ? internalCourses.map((c, idx) => html`
-                                        <div
-                                            key=${c.course_ref_id ?? c.course_id ?? idx}
-                                            class=${idx > 0 ? "pt-3 border-t border-red-100" : ""}
-                                        >
-                                            <div class="font-bold text-calvin-maroon">
-                                                ${c.course_id || "Pending"}
-                                            </div>
-
-                                            <div class="text-gray-900 font-medium">
-                                                ${c.course_title || "Equivalent Course Title"}
-                                            </div>
-                                        </div>
-                                                                    ${c.is_core
-                            ? html`
-                                    <div class="text-xs text-gray-500 pt-3">
-                                        <span>
-                                            <i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>
-                                            Fulfills Core Requirement
-                                        </span>
-                                    </div>
-                                `
-                            : html`
-                                    <div class="text-xs text-gray-500 pt-3">
-                                        <span>
-                                            <i class="bi bi-journal-x mr-1 text-gray-400"></i>
-                                            Does Not Fulfill Core Requirement
-                                        </span>
-                                    </div>
-                                `
-                        }
-                                    `)
-                    : html`
-                                        <div class="text-gray-500 italic">
-                                            No Calvin equivalent available.
-                                        </div>
-                                    `}
+                        <div class="bg-red-50/30 p-3.5 rounded-lg border border-red-100/60 space-y-1">
+                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-calvin-maroon block mb-1">Calvin Equivalent</span>
+                            <div class="font-bold text-calvin-maroon">${internalCourse.course_id || "Pending"}</div>
+                            <div class="text-gray-900 font-medium">${internalCourse.course_title || "Equivalent Course Title"}</div>
+                            <div class="text-xs text-gray-500 pt-1">
+                                <span><i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>Fulfills Core Requirement</span>
                             </div>
                         </div>
                     </div>
@@ -523,32 +468,32 @@
                     `}
                 </div>
             `;
-        };
+    };
 
-        // ==========================================
-        // ADDITIONAL QUESTIONS COMPONENT
-        // ==========================================
-        const QuestionsAccordion = () => {
-            const [isOpen, setIsOpen] = useState(false);
+    // ==========================================
+    // ADDITIONAL QUESTIONS COMPONENT
+    // ==========================================
+    const QuestionsAccordion = () => {
+        const [isOpen, setIsOpen] = useState(false);
 
-            // Dynamic script injection for Slate form when expanded
-            useEffect(() => {
-                if (isOpen) {
-                    const container = document.getElementById("slate-script-container");
-                    if (container && !container.querySelector("script")) {
-                        const script = document.createElement("script");
-                        script.src = "https://admissions.calvin.edu/register/?id=c2b76835-4762-4935-953c-baf7c0f22358&output=embed&div=form_c2b76835-4762-4935-953c-baf7c0f22358";
-                        script.async = true;
-                        container.appendChild(script);
-                    }
+        // Dynamic script injection for Slate form when expanded
+        useEffect(() => {
+            if (isOpen) {
+                const container = document.getElementById("slate-script-container");
+                if (container && !container.querySelector("script")) {
+                    const script = document.createElement("script");
+                    script.src = "https://admissions.calvin.edu/register/?id=c2b76835-4762-4935-953c-baf7c0f22358&output=embed&div=form_c2b76835-4762-4935-953c-baf7c0f22358";
+                    script.async = true;
+                    container.appendChild(script);
                 }
-            }, [isOpen]);
+            }
+        }, [isOpen]);
 
-            return html`
+        return html`
             <div class="w-[80%] mx-auto my-8 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
                 <h2 id="inquiryFormHeading" class="m-0">
-                    <button
-                        type="button"
+                    <button 
+                        type="button" 
                         onClick=${() => setIsOpen(!isOpen)}
                         class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 text-gray-900 font-bold text-base sm:text-lg transition-colors border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-calvin-maroon/20"
                         aria-expanded=${isOpen}
@@ -560,7 +505,7 @@
                         <i class=${`bi ${isOpen ? 'bi-chevron-up' : 'bi-chevron-down'} text-gray-500 text-sm`}></i>
                     </button>
                 </h2>
-
+                
                 ${isOpen && html`
                     <div class="p-6 border-t border-gray-200 bg-white">
                         <div id="form_c2b76835-4762-4935-953c-baf7c0f22358" class="text-gray-700">
@@ -571,25 +516,25 @@
                 `}
             </div>
         `;
-        };
+    };
 
-        // ==========================================
-        // INTRO BANNER COMPONENT
-        // ==========================================
-        const IntroBanner = () => {
-            return html`
+    // ==========================================
+    // INTRO BANNER COMPONENT
+    // ==========================================
+    const IntroBanner = () => {
+        return html`
         <div class="max-w-[80%] mx-auto mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6 sm:p-8 space-y-5 text-gray-700">
             <p class="text-base sm:text-lg leading-relaxed text-gray-900">
-                Use this tool to find pre-approved transfer equivalencies and see how courses may transfer to Calvin. Select a school, search for and select the courses you want to transfer to Calvin, then click <strong>Export PDF</strong> to download your list.
+                Use this tool to find pre-approved transfer equivalencies and see how courses may transfer to Calvin. Search for your school, select the courses you want to transfer to Calvin, and click <strong>Export PDF</strong> to download your list.
             </p>
-
+            
             <div class="bg-gray-50 border-l-4 border-calvin-maroon p-4 rounded-r-md text-sm sm:text-base">
-                <span class="font-bold text-gray-900">If your school or courses are not in the list, we may still accept credit.</span> You can
-                <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://admissions.calvin.edu/register/transfer-rfi" target="_blank">
+                <span class="font-bold text-gray-900">If your school or courses are not in the list, we may still accept credit.</span> You can 
+                <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://admissions.calvin.edu/register/transfer-rfi">
                     request a personalized credit evaluation for a more complete review.
                 </a>
             </div>
-
+            
             <div>
                 <p class="font-bold text-gray-900 mb-2">Tips:</p>
                 <ul class="list-disc list-outside pl-5 space-y-1.5 text-sm sm:text-base">
@@ -599,19 +544,19 @@
             </div>
         </div>
         `;
-        };
+    };
 
-        // ==========================================
-        // ABOUT TRANSFER COMPONENT
-        // ==========================================
-        const AboutTransfer = () => {
-            const [isOpen, setIsOpen] = useState(false);
+    // ==========================================
+    // ABOUT TRANSFER COMPONENT
+    // ==========================================
+    const AboutTransfer = () => {
+        const [isOpen, setIsOpen] = useState(false);
 
-            return html`
+        return html`
             <div class="w-[80%] mx-auto my-8 mb-0 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
                 <h2 id="aboutTransferHeading" class="m-0">
-                    <button
-                        type="button"
+                    <button 
+                        type="button" 
                         onClick=${() => setIsOpen(!isOpen)}
                         class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 hover:bg-gray-100 text-gray-900 font-bold text-base sm:text-lg transition-colors border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-calvin-maroon/20"
                         aria-expanded=${isOpen}
@@ -623,12 +568,12 @@
                         <i class=${`bi ${isOpen ? 'bi-chevron-up' : 'bi-chevron-down'} text-gray-500 text-sm`}></i>
                     </button>
                 </h2>
-
+                
                 ${isOpen && html`
                     <div class="p-6 border-t border-gray-200 bg-white text-gray-700">
                         <ul class="list-disc pl-5 space-y-3 text-sm sm:text-base leading-relaxed">
                             <li>You’ll receive the number of credits awarded by the other institution, even if the corresponding Calvin course is worth more credits. For example, a three-credit psychology course will transfer as three credits, even if Calvin’s course is four credits.</li>
-                            <li>Some Calvin Core categories cannot be satisfied by transfer course work. See our full transfer policy for details.</li>
+                            <li>Some Calvin Core categories cannot be satisfied by transfer course work. See our full <a href="https://calvin.edu/policies/transfer-policy" class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium" target="_blank">transfer policy</a> for details.</li>
                             <li>A conversion policy applies to schools that use quarter hours or course units.</li>
                             <li>Coursework that applies to Calvin’s major or minor requirements must go through a final assessment by their respective departments.</li>
                         </ul>
@@ -636,239 +581,270 @@
                 `}
             </div>
         `;
+    };
+
+    // ==========================================
+    // MAIN APPLICATION COMPONENT
+    // ==========================================
+    const App = () => {
+      const [institutions, setInstitutions] = useState([]);
+      const [selectedInstId, setSelectedInstId] = useState("");
+      const [courses, setCourses] = useState([]);
+      const [loading, setLoading] = useState(false);
+      const [search, setSearch] = useState("");
+      const [cart, setCart] = useState(new Map());
+      const [errorMsg, setErrorMsg] = useState("");
+
+      // Load Institutions on Mount
+      useEffect(() => {
+        const loadInstitutions = async () => {
+          try {
+            const CACHE_KEY = "calvin_institution_cache";
+            const cachedRaw = localStorage.getItem(CACHE_KEY);
+            if (cachedRaw) {
+              const cached = JSON.parse(cachedRaw);
+              if (cached.data && isFresh(cached.timestamp)) {
+                setInstitutions(cached.data);
+                return;
+              }
+            }
+            const response = await fetch(INSTITUTION_NO_AUTH_API_URL);
+            if (!response.ok) throw new Error("Failed to fetch institutions");
+            const result = await response.json();
+            const data = result.Institutions || [];
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+            setInstitutions(data);
+          } catch (e) {
+            setErrorMsg("Institutions could not be loaded. Check API token or connection.");
+          }
+        };
+        loadInstitutions();
+      }, []);
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        const fetchGlobalCourses = async (search) => {
+            const response = await fetchWithRetry(
+                `${COURSE_NO_AUTH_API_URL}?Search=${encodeURIComponent(search)}`
+            );
+
+            const result = await response.json();
+
+            return result.rules || [];
         };
 
-        // ==========================================
-        // MAIN APPLICATION COMPONENT
-        // ==========================================
-        const App = () => {
-            const [institutions, setInstitutions] = useState([]);
-            const [selectedInstId, setSelectedInstId] = useState("");
-            const [courses, setCourses] = useState([]);
-            const [loading, setLoading] = useState(false);
-            const [search, setSearch] = useState("");
-            const [cart, setCart] = useState(new Map());
-            const [errorMsg, setErrorMsg] = useState("");
+        const fetchWithRetry = async (url, maxRetries = 3) => {
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                const response = await fetch(url);
 
-            // Load Institutions on Mount
-            useEffect(() => {
-                const loadInstitutions = async () => {
-                    try {
-                        const CACHE_KEY = "calvin_institution_cache";
-                        const cachedRaw = localStorage.getItem(CACHE_KEY);
-                        if (cachedRaw) {
-                            const cached = JSON.parse(cachedRaw);
-                            if (cached.data && isFresh(cached.timestamp)) {
-                                setInstitutions(cached.data);
-                                return;
-                            }
-                        }
-                        const response = await fetch(INSTITUTION_NO_AUTH_API_URL);
-                        if (!response.ok) throw new Error("Failed to fetch institutions");
-                        const result = await response.json();
-                        const data = result.Institutions || [];
-                        localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
-                        setInstitutions(data);
-                    } catch (e) {
-                        setErrorMsg("Institutions could not be loaded. Check API token or connection.");
-                    }
-                };
-                loadInstitutions();
-            }, []);
-
-            // Helper to fetch rules for a specific institution ID
-            const fetchCoursesForInstitution = async (instId) => {
-                const cached = courseCache.get(instId);
-                if (cached && isFresh(cached.timestamp)) return cached.data;
-
-                const response = await fetch(`${COURSE_NO_AUTH_API_URL}?InstitutionID=${encodeURIComponent(instId)}`);
-                if (!response.ok) return [];
-                const result = await response.json();
-                const data = result.rules || [];
-                courseCache.set(instId, { data, timestamp: Date.now() });
-                return data;
-            };
-
-            // Load Courses (Selected Institution OR Global Search Across All)
-            useEffect(() => {
-                const loadCourses = async () => {
-                    // Case 1: Specific institution selected
-                    if (selectedInstId) {
-                        setLoading(true);
-                        setErrorMsg("");
-                        try {
-                            const data = await fetchCoursesForInstitution(selectedInstId);
-                            setCourses(data);
-                        } catch (e) {
-                            setErrorMsg("Courses could not be loaded for the selected institution.");
-                        } finally {
-                            setLoading(false);
-                        }
-                        return;
-                    }
-
-                    // Case 2: Global Search typed with NO institution selected
-                    if (!selectedInstId && search.trim().length >= 2) {
-                        setLoading(true);
-                        setErrorMsg("");
-                        try {
-                            // Query all institutions concurrently
-                            const allResults = await Promise.all(
-                                institutions.map(async (inst) => {
-                                    const instCourses = await fetchCoursesForInstitution(inst.ReferenceID);
-                                    return instCourses.map(c => ({
-                                        ...c,
-                                        _institutionName: inst.InstitutionName,
-                                        _institutionId: inst.ReferenceID
-                                    }));
-                                })
-                            );
-                            setCourses(allResults.flat());
-                        } catch (e) {
-                            setErrorMsg("Error searching across institutions.");
-                        } finally {
-                            setLoading(false);
-                        }
-                        return;
-                    }
-
-                    // Case 3: No institution selected & search cleared
-                    if (!selectedInstId && !search.trim()) {
-                        setCourses([]);
-                    }
-                };
-
-                const timeoutId = setTimeout(loadCourses, 300); // 300ms debounce for typing
-                return () => clearTimeout(timeoutId);
-            }, [selectedInstId, search, institutions]);
-
-            // Live Filter
-            const filteredCourses = useMemo(() => {
-                if (!search) return courses;
-                const lowerSearch = search.toLowerCase();
-                return courses.filter(c => {
-                    const searchStr = (JSON.stringify(c) + " " + (c._institutionName || "")).toLowerCase();
-                    return searchStr.includes(lowerSearch);
-                });
-            }, [courses, search]);
-
-            const toggleCart = (courseId, course) => {
-                setCart(prev => {
-                    const next = new Map(prev);
-                    if (next.has(courseId)) {
-                        next.delete(courseId);
-                    } else {
-                        const instName =
-                            course._institutionName ||
-                            institutions.find(
-                                i => String(i.ReferenceID) === String(selectedInstId)
-                            )?.InstitutionName ||
-                            "External Institution";
-                        next.set(courseId, { ...course, institutionName: instName });
-                    }
-                    return next;
-                });
-            };
-
-            const removeFromCart = (courseId) => {
-                setCart(prev => {
-                    const next = new Map(prev);
-                    next.delete(courseId);
-                    return next;
-                });
-            };
-
-            const totalCredits = useMemo(() => {
-                return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 3), 0);
-            }, [cart]);
-
-            const handleExport = () => {
-                if (cart.size === 0) {
-                    alert("Please select at least one course before exporting.");
-                    return;
+                if (response.ok) {
+                    return response;
                 }
 
-                const printContainer = document.createElement("div");
-                printContainer.style.width = "750px";
-                printContainer.style.padding = "24px 28px";
-                printContainer.style.fontFamily = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
-                printContainer.style.color = "#282828";
-                printContainer.style.backgroundColor = "#ffffff";
+                if (response.status !== 429 || attempt === maxRetries) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
 
-                const dateStr = new Date().toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                });
+                const retryAfter = response.headers.get("Retry-After");
 
-                const instSet = new Set();
-                cart.forEach(c => instSet.add(c.institutionName || "External Institution"));
-                const instList = Array.from(instSet).join(", ");
+                const delay = retryAfter
+                    ? Number(retryAfter) * 1000
+                    : Math.pow(2, attempt) * 1000 + Math.random() * 500;
 
-                let rowsHtml = "";
-                let index = 0;
-                cart.forEach((course) => {
-                    const externalCourses = course.external_courses || [];
-                    const internalCourses = course.internal_courses || [];
+                console.warn(`Rate limited. Retrying in ${Math.round(delay)}ms`);
 
-                    const externalHtml = externalCourses.length
-                        ? externalCourses.map((ext, i) => `
-                        <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
-                            <div style="font-size: 13px; font-weight: 700; color: #111827;">
-                                ${ext.course_id || "External Course"}
-                            </div>
+                await sleep(delay);
+            }
+        };
 
-                            <div style="font-size: 11px; color: #4b5563; margin-top: 2px; line-height: 1.35;">
-                                ${ext.course_title || "Untitled External Course"}
-                            </div>
-                        </div>
-                    `).join("")
-                        : "No external course";
+      // Helper to fetch rules for a specific institution ID
+        const fetchCoursesForInstitution = async (instId) => {
+            const cacheKey = `courses_${instId}`;
+            const cachedRaw = localStorage.getItem(cacheKey);
 
-                    const internalHtml = internalCourses.length
-                        ? internalCourses.map((internal, i) => `
-                        <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
-                            <div style="font-size: 13px; font-weight: 700; color: #8c2232;">
-                                ${internal.course_id || "Calvin Equivalent"}
-                            </div>
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
 
-                            <div style="font-size: 11px; color: #1f2937; margin-top: 2px; line-height: 1.35; font-weight: 500;">
-                                ${internal.course_title || "Equivalent Calvin Course"}
-                            </div>
+                if (cached.data && isFresh(cached.timestamp)) {
+                    return cached.data;
+                }
+            }
 
-                            <div style="font-size: 10px; color: #6b7280; margin-top: 3px;">
-                                ${course.credit_hours ?? "—"} Credits
-                            </div>
-                        </div>
-                    `).join("")
-                        : "No Calvin equivalent";
+            const response = await fetchWithRetry(
+                `${COURSE_NO_AUTH_API_URL}?InstitutionID=${encodeURIComponent(instId)}`
+            );
 
-                    const bgClass = index % 2 === 0 ? "#ffffff" : "#fcfcfc";
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
-                    rowsHtml += `
+            const result = await response.json();
+            const data = result.rules || [];
+
+            localStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    data,
+                    timestamp: Date.now()
+                })
+            );
+
+            return data;
+        };
+
+      // Load Courses (Selected Institution OR Global Search Across All)
+      useEffect(() => {
+        const loadCourses = async () => {
+            // Selected institution: fetch once, then filter locally
+            if (selectedInstId) {
+                setLoading(true);
+                setErrorMsg("");
+
+                try {
+                    const data = await fetchCoursesForInstitution(selectedInstId);
+                    setCourses(data);
+                } catch (e) {
+                    setErrorMsg("Courses could not be loaded for the selected institution.");
+                } finally {
+                    setLoading(false);
+                }
+
+                return;
+            }
+
+            // Global search
+            if (search.trim().length >= 3) {
+                setLoading(true);
+                setErrorMsg("");
+
+                try {
+                    const data = await fetchGlobalCourses(search.trim());
+                    setCourses(data);
+                } catch (e) {
+                    setErrorMsg("Error searching across institutions.");
+                } finally {
+                    setLoading(false);
+                }
+
+                return;
+            }
+
+            setCourses([]);
+        };
+
+        const timeoutId = setTimeout(loadCourses, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [selectedInstId, search]);
+
+      // Live Filter
+        const filteredCourses = useMemo(() => {
+            // Global search was already filtered by Workato
+            if (!selectedInstId || !search.trim()) return courses;
+
+            const term = search.trim().toLowerCase();
+
+            return courses.filter(c => {
+                const searchable = [
+                    c.external_courses?.[0]?.course_id,
+                    c.external_courses?.[0]?.course_title,
+                    c.internal_courses?.[0]?.course_id,
+                    c.internal_courses?.[0]?.course_title,
+                    c.core_requirement
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                return searchable.includes(term);
+            });
+        }, [courses, search, selectedInstId]);
+
+      const removeFromCart = (courseId) => {
+        setCart(prev => {
+          const next = new Map(prev);
+          next.delete(courseId);
+          return next;
+        });
+      };
+
+      const totalCredits = useMemo(() => {
+        return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 3), 0);
+      }, [cart]);
+
+      const handleExport = () => {
+        if (cart.size === 0) {
+          alert("Please select at least one course before exporting.");
+          return;
+        }
+
+        const printContainer = document.createElement("div");
+        printContainer.style.width = "750px";
+        printContainer.style.padding = "24px 28px";
+        printContainer.style.fontFamily = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
+        printContainer.style.color = "#282828";
+        printContainer.style.backgroundColor = "#ffffff";
+
+        const dateStr = new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        });
+
+        const instSet = new Set();
+        cart.forEach(c => instSet.add(c.institutionName || "External Institution"));
+        const instList = Array.from(instSet).join(", ");
+
+        let rowsHtml = "";
+        let index = 0;
+        cart.forEach((course) => {
+          const ext = course.external_courses?.[0] || {};
+          const internal = course.internal_courses?.[0] || {};
+          const bgClass = index % 2 === 0 ? "#ffffff" : "#fcfcfc";
+
+          rowsHtml += `
                         <tr style="background-color: ${bgClass}; border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
                             <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                ${externalHtml}
-
-                                <div style="font-size: 10px; color: #8c2232; margin-top: 6px; font-weight: 600;">
+                                <div style="font-size: 13px; font-weight: 700; color: #111827;">
+                                    ${ext.course_id || "External Course"}
+                                </div>
+                                <div style="font-size: 11px; color: #4b5563; margin-top: 2px; line-height: 1.35;">
+                                    ${ext.course_title || "Untitled External Course"}
+                                </div>
+                                <div style="font-size: 10px; color: #8c2232; margin-top: 4px; font-weight: 600;">
                                     ${course.institutionName || "External Institution"}
                                 </div>
                             </td>
 
-                            <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                ${internalHtml}
+                            <td style="padding: 12px 10px; vertical-align: top; text-align: center; width: 20%;">
+                                ${course.core_requirement ? `
+                                    <div style="display: block; margin-top: 4px; font-size: 9px; font-weight: 600; color: #92400e; background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 3px; padding: 2px 4px;">
+                                        ${course.core_requirement}
+                                    </div>
+                                ` : ''}
+                                <div style="font-size: 11px; color: #6b7280; font-weight: 600; margin-top: 6px;">
+                                    ${course.credit_hours || 3} Credits
+                                </div>
+                            </td>
 
-                                <div style="font-size: 10px; color: #6b7280; margin-top: 6px;">
-                                    Fulfills Degree Requirement
+                            <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
+                                <div style="font-size: 13px; font-weight: 700; color: #8c2232;">
+                                    ${internal.course_id || "Calvin Equivalent"}
+                                </div>
+                                <div style="font-size: 11px; color: #1f2937; margin-top: 2px; line-height: 1.35; font-weight: 500;">
+                                    ${internal.course_title || "Equivalent Calvin Course"}
+                                </div>
+                                <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">
+                                    Fulfills Core Requirement
                                 </div>
                             </td>
                         </tr>
                     `;
-                    index++;
-                });
+          index++;
+        });
 
-                // PDF LAYOUT
-                printContainer.innerHTML = `
+        // PDF LAYOUT
+        printContainer.innerHTML = `
                     <!-- Header Bar -->
                     <div style="background-color: #8c2232; padding: 18px 22px; border-radius: 6px 6px 0 0; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
                         <div>
@@ -887,13 +863,14 @@
 
                     <div style="height: 4px; background-color: #f2cd14; margin-bottom: 20px;"></div>
                     <!-- Disclaimer Text -->
-                    <p class="mb-3">If your school or courses are not in the list, we may still accept credit. Visit <a href="https://calvin.edu/go/creditevaluation" style="color: #8c2232; text-decoration: underline;" target="_blank">calvin.edu/go/creditevaluation</a> to share your transcript and get one-on-one help.</p>
+                    <p class="mb-3">If your school or courses are not in the list, we may still accept credit. Visit calvin.edu/go/creditevaluation to share your transcript and get one-on-one help.</p>
 
                     <!-- Evaluation Table -->
                     <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
                         <thead>
                             <tr style="background-color: #282828; color: #ffffff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
                                 <th style="padding: 10px 14px; text-align: left; font-weight: 700; width: 40%;">Transferring Course</th>
+                                <th style="padding: 10px 10px; text-align: center; font-weight: 700; width: 20%;">Status & Credits</th>
                                 <th style="padding: 10px 14px; text-align: left; font-weight: 700; width: 40%;">Calvin University Equivalent</th>
                             </tr>
                         </thead>
@@ -921,19 +898,19 @@
                     </div>
                 `;
 
-                const options = {
-                    margin: [0.3, 0.3, 0.3, 0.3],
-                    filename: "Calvin-Transfer-Credit-Evaluation.pdf",
-                    image: { type: "jpeg", quality: 0.98 },
-                    html2canvas: { scale: 2, scrollY: 0, useCORS: true },
-                    jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-                    pagebreak: { mode: ["avoid-all", "css", "legacy"] }
-                };
+        const options = {
+          margin: [0.3, 0.3, 0.3, 0.3],
+          filename: "Calvin-Transfer-Credit-Evaluation.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, scrollY: 0, useCORS: true },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+        };
 
-                html2pdf().set(options).from(printContainer).save();
-            };
+        html2pdf().set(options).from(printContainer).save();
+      };
 
-            return html`
+      return html`
                 <div class="min-h-screen flex flex-col">
                     <${Header} />
                     <${Breadcrumb} />
@@ -942,6 +919,8 @@
 
                         <!-- Left Sidebar -->
                         <div class="lg:col-span-3 space-y-6">
+                        <${AboutTransfer} />
+
                             <div>
                                 <label class="block font-bold text-gray-800 mb-2 text-sm">Institution Search:</label>
                                 <${InstitutionAutocomplete}
@@ -966,13 +945,11 @@
 
                             <hr class="border-gray-200" />
 
-                            <button
-                                type="button"
-                                onClick=${handleExport}
-                                class="w-full flex items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors text-sm"
-                            >
-                                <i class="bi bi-file-earmark-pdf text-base"></i> Export PDF
-                            </button>
+                            <button href="" class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm" onClick=${e => {
+                                e.preventDefault();
+                                setSearch("");
+                                setSelectedInstId(null);
+                            }}>Reset</button>
                         </div>
 
                         <!-- Main Content Area -->
@@ -991,20 +968,13 @@
                                     <div class="bg-yellow-50 text-yellow-800 p-4 rounded-md border border-yellow-200 mb-4 text-sm">
                                         No transfer courses were returned for this institution.
                                     </div>
-                                ` : null}
+                                ` : html`<div class="bg-gray-100 p-4 rounded-md border border-gray-200 mb-4 text-sm">Search the transferring institution to begin.</div>`}
 
                                 <div class="space-y-4">
                                     ${filteredCourses.map((course, index) => {
-                const courseId = getMappingId(course);
-
-                return html`<${CourseCard}
-                                            key=${courseId}
-                                            course=${course}
-                                            index=${index}
-                                            inCart=${cart.has(courseId)}
-                                            onToggleCart=${toggleCart}
-                                        />`;
-            })}
+        const courseId = course.internal_courses?.[0]?.course_ref_id || `course-${index}`;
+        return html`<${CourseCard} key=${courseId} course=${course} index=${index} inCart=${cart.has(courseId)} onToggleCart=${toggleCart} />`;
+      })}
                                 </div>
                             `}
                         </div>
@@ -1048,19 +1018,26 @@
                                     <span class="bg-gray-200 text-gray-800 text-xs px-2.5 py-1 rounded-full">${totalCredits}</span>
                                 </div>
                             </div>
+                            
+                            <button
+                                type="button"
+                                onClick=${handleExport}
+                                class="w-full flex items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors text-sm mt-4"
+                            >
+                                <i class="bi bi-file-earmark-pdf text-base"></i> Export PDF
+                            </button>
                         </div>
 
                         </main>
 
-                        <${AboutTransfer} />
                         <${QuestionsAccordion} />
                         <${Footer} />
                 </div>
             `;
-        };
+    };
 
-        render(html`<${App} />`, document.getElementById('app'));
-    </script>
-</body>
+    render(html`<${App} />`, document.getElementById('app'));
+  </script>
+    </body>
 
 </html>
