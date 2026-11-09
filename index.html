@@ -114,7 +114,6 @@
     const COURSE_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-courses";
     const INSTITUTION_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-institutions";
 
-    const courseCache = new Map();
     const isFresh = (timestamp) => Date.now() - timestamp < CACHE_TTL;
     const getCourseLabel = (courses = []) => courses.map(c => `${c.course_id || "Unknown"} - ${c.course_title || "Untitled"}`).join(", ");
 
@@ -123,6 +122,14 @@
       const doc = new DOMParser().parseFromString(htmlString, 'text/html');
       return doc.body.textContent || "";
     };
+
+    const getCourseKey = (course) =>
+        course.credit_rule_id ||
+        [
+            course.institution_ref_id || "",
+            course.external_courses?.[0]?.course_ref_id || "",
+            course.internal_courses?.[0]?.course_ref_id || ""
+        ].join("|");
 
     // ==========================================
     // HEADER COMPONENT
@@ -371,13 +378,12 @@
     // ==========================================
     // SIDE-BY-SIDE EQUIVALENCY COURSE CARD UI
     // ==========================================
-    const CourseCard = ({ course, index, inCart, onToggleCart }) => {
+    const CourseCard = ({ course, inCart, onToggleCart }) => {
       const [expanded, setExpanded] = useState(false);
-      const courseId = course.internal_courses?.[0]?.course_id || `course-${index}`;
+      const courseId = getCourseKey(course);
 
       const externalCourse = course.external_courses?.[0] || {};
       const internalCourse = course.internal_courses?.[0] || {};
-
       return html`
                 <div class=${`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${inCart ? 'border-calvin-maroon ring-1 ring-calvin-maroon shadow-md' : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow'}`}>
 
@@ -397,14 +403,16 @@
                                     <span class="text-gray-400 font-normal mx-2">→</span>
                                     ${internalCourse.course_id || "Calvin Equivalent"}
                                 </h3>
+                                <!--
                                 <div class="flex flex-wrap items-center gap-2 mt-1">
  
-                                    ${course.core_requirement && html`
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                                            <i class="bi bi-mortarboard-fill mr-1 text-[10px]"></i> ${course.core_requirement}
-                                        </span>
+                                    ${internalCourse.is_core && html`
+                                        <div class="text-xs text-gray-600 pt-1">
+                                            <i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>
+                                            Fulfills Core Requirement
+                                        </div>
                                     `}
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
@@ -428,7 +436,9 @@
                             <div class="font-bold text-calvin-maroon">${internalCourse.course_id || "Pending"}</div>
                             <div class="text-gray-900 font-medium">${internalCourse.course_title || "Equivalent Course Title"}</div>
                             <div class="text-xs text-gray-500 pt-1">
-                                <span><i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>Fulfills Core Requirement</span>
+                                ${internalCourse.is_core && html`
+                                    <span><i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>Fulfills Core Requirement</span>
+                                `}
                             </div>
                         </div>
                     </div>
@@ -553,7 +563,7 @@
         const [isOpen, setIsOpen] = useState(false);
 
         return html`
-            <div class="w-[80%] mx-auto my-8 mb-0 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+            <div class="w-full mx-auto my-8 mb-0 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
                 <h2 id="aboutTransferHeading" class="m-0">
                     <button 
                         type="button" 
@@ -679,7 +689,12 @@
             }
 
             const result = await response.json();
-            const data = result.rules || [];
+
+            const data = (result.response?.rules || []).map(rule => ({
+                ...rule,
+                institution: result.response?.institution || "",
+                institution_ref_id: result.response?.institution_ref_id || ""
+            }));
 
             localStorage.setItem(
                 cacheKey,
@@ -688,7 +703,6 @@
                     timestamp: Date.now()
                 })
             );
-
             return data;
         };
 
@@ -768,6 +782,20 @@
         });
       };
 
+      const toggleCart = (courseId, course) => {
+            setCart(prev => {
+                const next = new Map(prev);
+
+                if (next.has(courseId)) {
+                    next.delete(courseId);
+                } else {
+                    next.set(courseId, course);
+                }
+
+                return next;
+            });
+        };
+
       const totalCredits = useMemo(() => {
         return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 3), 0);
       }, [cart]);
@@ -791,10 +819,11 @@
           day: "numeric"
         });
 
+        
         const instSet = new Set();
-        cart.forEach(c => instSet.add(c.institutionName || "External Institution"));
+        cart.forEach(c => instSet.add(c.institution || "External Institution"));
         const instList = Array.from(instSet).join(", ");
-
+        
         let rowsHtml = "";
         let index = 0;
         cart.forEach((course) => {
@@ -812,7 +841,7 @@
                                     ${ext.course_title || "Untitled External Course"}
                                 </div>
                                 <div style="font-size: 10px; color: #8c2232; margin-top: 4px; font-weight: 600;">
-                                    ${course.institutionName || "External Institution"}
+                                    ${course.institution || "External Institution"}
                                 </div>
                             </td>
 
@@ -835,7 +864,7 @@
                                     ${internal.course_title || "Equivalent Calvin Course"}
                                 </div>
                                 <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">
-                                    Fulfills Core Requirement
+                                    ${internalCourse.is_core ? 'Fulfills Core Requirement' : ''}
                                 </div>
                             </td>
                         </tr>
@@ -918,7 +947,8 @@
                     <main class="flex-1 max-w-[120rem] mx-auto w-full px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                         <!-- Left Sidebar -->
-                        <div class="lg:col-span-3 space-y-6">
+                        
+                        <div class="lg:col-span-3 space-y-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5 space-y-5">
                         <${AboutTransfer} />
 
                             <div>
@@ -945,11 +975,12 @@
 
                             <hr class="border-gray-200" />
 
-                            <button href="" class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm" onClick=${e => {
-                                e.preventDefault();
+                            <button class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm" onClick=${e => {
                                 setSearch("");
-                                setSelectedInstId(null);
-                            }}>Reset</button>
+                            }}>
+                                Reset
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
                         </div>
 
                         <!-- Main Content Area -->
@@ -972,8 +1003,8 @@
 
                                 <div class="space-y-4">
                                     ${filteredCourses.map((course, index) => {
-        const courseId = course.internal_courses?.[0]?.course_ref_id || `course-${index}`;
-        return html`<${CourseCard} key=${courseId} course=${course} index=${index} inCart=${cart.has(courseId)} onToggleCart=${toggleCart} />`;
+        const courseId = getCourseKey(course);
+        return html`<${CourseCard} key=${courseId} course=${course} inCart=${cart.has(courseId)} onToggleCart=${toggleCart} />`;
       })}
                                 </div>
                             `}
@@ -995,7 +1026,7 @@
                                             ${Array.from(cart.entries()).map(([courseId, course]) => html`
                                                 <li key=${courseId} class="py-3 flex justify-between items-start gap-3">
                                                     <div class="flex-1 min-w-0">
-                                                        <div class="font-bold text-calvin-maroon text-xs mb-0.5 truncate">${course.institutionName}</div>
+                                                        <div class="font-bold text-calvin-maroon text-xs mb-0.5 truncate">${course.institution || "External Institution"}</div>
                                                         <div class="font-medium text-xs text-gray-900 leading-tight mb-1">${getCourseLabel(course.internal_courses || [])}</div>
                                                         <div class="text-[0.7rem] text-gray-500 truncate">From: ${getCourseLabel(course.external_courses || [])}</div>
                                                     </div>
@@ -1017,15 +1048,15 @@
                                     <span>Total Credits:</span>
                                     <span class="bg-gray-200 text-gray-800 text-xs px-2.5 py-1 rounded-full">${totalCredits}</span>
                                 </div>
-                            </div>
-                            
-                            <button
+                                
+                                <button
                                 type="button"
                                 onClick=${handleExport}
-                                class="w-full flex items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors text-sm mt-4"
-                            >
+                                class="w-full flex items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors text-sm "
+                                >
                                 <i class="bi bi-file-earmark-pdf text-base"></i> Export PDF
-                            </button>
+                                </button>
+                                </div>
                         </div>
 
                         </main>
