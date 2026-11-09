@@ -690,11 +690,14 @@
 
             const result = await response.json();
 
-            const data = (result.response?.rules || []).map(rule => ({
+            const data = (result.response?.rules || result.rules || []).map(rule => ({
                 ...rule,
-                institution: result.response?.institution || "",
-                institution_ref_id: result.response?.institution_ref_id || ""
+                institution: result.institution || "",
+                institution_ref_id: result.institution_ref_id || ""
             }));
+
+            // console.log(result)
+            // console.log(data)
 
             localStorage.setItem(
                 cacheKey,
