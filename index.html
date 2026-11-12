@@ -5,7 +5,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport"
             content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <title>Calvin Transfer Tool</title>
+        <title>Pre-approved Transfer Courses | Calvin University</title>
         <link rel="icon"
             href="https://calvin.edu/sites/default/files/favicon_0.ico"
             type="image/vnd.microsoft.icon">
@@ -98,6 +98,10 @@
         outline: 2px solid rgba(140, 34, 50, 0.15) !important;
         outline-offset: 1px;
     }
+    /* Hide paragraph elements within the form */
+    #form_c2b76835-4762-4935-953c-baf7c0f22358 p{
+        display: none !important;
+    }
   </style>
     </head>
 
@@ -112,6 +116,7 @@
 
     const CACHE_TTL = 24 * 60 * 60 * 1000;
     const COURSE_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-courses";
+    const GLOBAL_COURSE_SEARCH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-all-courses";
     const INSTITUTION_NO_AUTH_API_URL = "https://apim.workato.com/calvinuniversity/transfer-credit-rules-no-auth-vv-1/wd-api-int449-institutions";
 
     const isFresh = (timestamp) => Date.now() - timestamp < CACHE_TTL;
@@ -233,14 +238,14 @@
     // BREADCRUMB COMPONENT
     // ==========================================
     const Breadcrumb = () => html`
-            <div class="max-w-7xl mx-auto px-4 sm:px-8 py-4">
+            <div class="max-w-7xl px-4 sm:px-8 py-4">
                 <nav aria-label="breadcrumb">
                     <ol class="flex flex-wrap items-center space-x-2 text-xs text-gray-600 font-medium">
                         <li><a href="https://sites.calvin.edu/" class="hover:underline text-gray-800">Home</a></li>
                         <li class="before:content-['/'] before:mr-2 text-gray-400">
                             <a href="https://calvin.edu/registrars-office" class="hover:underline text-gray-800">Registrar's Office</a>
                         </li>
-                        <li class="before:content-['/'] before:mr-2 text-gray-500 font-normal">Calvin Transfer Tool</li>
+                        <li class="before:content-['/'] before:mr-2 text-gray-500 font-normal">Pre-approved Transfer Courses</li>
                     </ol>
                 </nav>
             </div>
@@ -315,7 +320,7 @@
     // ==========================================
     // AUTOCOMPLETE COMPONENT
     // ==========================================
-    const InstitutionAutocomplete = ({ institutions, selectedId, onChange }) => {
+    const InstitutionAutocomplete = ({ institutions, selectedId, onChange, disabled = false }) => {
       const [query, setQuery] = useState("");
       const [isOpen, setIsOpen] = useState(false);
 
@@ -339,19 +344,21 @@
                 <div class="relative">
                     <input
                         type="text"
-                        class="w-full bg-white border border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-calvin-maroon focus:ring focus:ring-calvin-maroon/20 py-2 px-3 text-sm transition-colors"
-                        placeholder="Type to search institution..."
+                        disabled=${disabled}
+                        class="w-full bg-white border border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-calvin-maroon focus:ring focus:ring-calvin-maroon/20 py-2 px-3 text-sm transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        placeholder=${disabled ? "Disabled during global course search" : "Type to search institution..."}
                         value=${query}
                         onInput=${e => {
-          setQuery(e.target.value);
-          setIsOpen(true);
-          if (e.target.value === "") onChange("");
-        }}
-                        onFocus=${() => setIsOpen(true)}
+                            if (disabled) return;
+                            setQuery(e.target.value);
+                            setIsOpen(true);
+                            if (e.target.value === "") onChange("");
+                        }}
+                        onFocus=${() => !disabled && setIsOpen(true)}
                         onBlur=${() => setIsOpen(false)}
                     />
 
-                    ${isOpen && html`
+                    ${isOpen && !disabled && html`
                         <ul class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto text-sm">
                             ${filteredInstitutions.length === 0 ? html`
                                 <li class="px-3 py-2 text-gray-500 italic">No institutions found</li>
@@ -382,8 +389,8 @@
       const [expanded, setExpanded] = useState(false);
       const courseId = getCourseKey(course);
 
-      const externalCourse = course.external_courses?.[0] || {};
-      const internalCourse = course.internal_courses?.[0] || {};
+      const externalCourses = course.external_courses || [];
+      const internalCourses = course.internal_courses || [];
       return html`
                 <div class=${`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${inCart ? 'border-calvin-maroon ring-1 ring-calvin-maroon shadow-md' : 'border-gray-200 hover:border-gray-300 shadow-sm hover:shadow'}`}>
 
@@ -399,46 +406,53 @@
                             />
                             <div>
                                 <h3 class="font-bold text-gray-900 text-base sm:text-lg leading-snug">
-                                    ${externalCourse.course_id || "Course Mapping"}
+                                    ${externalCourses.length
+                                        ? externalCourses.map(c => c.course_id).filter(Boolean).join(" , ")
+                                        : "Course Mapping"}
                                     <span class="text-gray-400 font-normal mx-2">→</span>
-                                    ${internalCourse.course_id || "Calvin Equivalent"}
+                                    ${internalCourses.length
+                                        ? internalCourses.map(c => c.course_id).filter(Boolean).join(" , ")
+                                        : "Calvin Equivalent"}
                                 </h3>
-                                <!--
-                                <div class="flex flex-wrap items-center gap-2 mt-1">
- 
-                                    ${internalCourse.is_core && html`
-                                        <div class="text-xs text-gray-600 pt-1">
-                                            <i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>
-                                            Fulfills Core Requirement
-                                        </div>
-                                    `}
-                                </div> -->
+
                             </div>
                         </div>
 
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 whitespace-nowrap border border-gray-200">
-                            ${course.credit_hours || 3} Credits
+                            ${course.credit_hours || null} Credits
                         </span>
                     </div>
 
                     <!-- Side-by-Side Content Grid -->
                     <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm relative">
                         <!-- Transferring Course Details -->
-                        <div class="bg-gray-50/70 p-3.5 rounded-lg border border-gray-100 space-y-1">
-                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 block mb-1">${course.institution || "External Institution"}</span>
-                            <div class="font-bold text-gray-900">${externalCourse.course_id || "Course"}</div>
-                            <div class="text-gray-700 font-medium">${externalCourse.course_title || "Untitled Course"}</div>
+                        <div class="bg-gray-50/70 p-3.5 rounded-lg border border-gray-100">
+                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 block mb-2">${course.institution || "External Institution"}</span>
+                            <div class="space-y-3">
+                                ${externalCourses.length ? externalCourses.map((c, idx) => html`
+                                    <div key=${c.course_ref_id || `${courseId}-external-${idx}`} class=${idx > 0 ? "pt-3 border-t border-gray-200" : ""}>
+                                        <div class="font-bold text-gray-900">${c.course_id || "Course"}</div>
+                                        <div class="text-gray-700 font-medium">${c.course_title || "Untitled Course"}</div>
+                                    </div>
+                                `) : html`<div class="text-gray-500 italic">No external course information available.</div>`}
+                            </div>
                         </div>
 
                         <!-- Calvin Equivalent Details -->
-                        <div class="bg-red-50/30 p-3.5 rounded-lg border border-red-100/60 space-y-1">
-                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-calvin-maroon block mb-1">Calvin Equivalent</span>
-                            <div class="font-bold text-calvin-maroon">${internalCourse.course_id || "Pending"}</div>
-                            <div class="text-gray-900 font-medium">${internalCourse.course_title || "Equivalent Course Title"}</div>
-                            <div class="text-xs text-gray-500 pt-1">
-                                ${internalCourse.is_core && html`
-                                    <span><i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>Fulfills Core Requirement</span>
-                                `}
+                        <div class="bg-red-50/30 p-3.5 rounded-lg border border-red-100/60">
+                            <span class="text-[0.65rem] font-bold uppercase tracking-wider text-calvin-maroon block mb-2">Calvin Equivalent</span>
+                            <div class="space-y-3">
+                                ${internalCourses.length ? internalCourses.map((c, idx) => html`
+                                    <div key=${c.course_ref_id || `${courseId}-internal-${idx}`} class=${idx > 0 ? "pt-3 border-t border-red-100" : ""}>
+                                        <div class="font-bold text-calvin-maroon">${c.course_id || "Pending"}</div>
+                                        <div class="text-gray-900 font-medium">${c.course_title || "Equivalent Course Title"}</div>
+                                        ${c.is_core && html`
+                                            <div class="text-xs text-gray-500 pt-1">
+                                                <span><i class="bi bi-journal-check mr-1 text-calvin-maroon"></i>Fulfills Core Requirement</span>
+                                            </div>
+                                        `}
+                                    </div>
+                                `) : html`<div class="text-gray-500 italic">No Calvin equivalent available.</div>`}
                             </div>
                         </div>
                     </div>
@@ -517,12 +531,16 @@
                 </h2>
                 
                 ${isOpen && html`
-                    <div class="p-6 border-t border-gray-200 bg-white">
-                        <div id="form_c2b76835-4762-4935-953c-baf7c0f22358" class="text-gray-700">
-                            Loading form...
-                        </div>
-                        <div id="slate-script-container"></div>
+                <div class="p-6 border-t border-gray-200 bg-white">
+                    <p class="mb-2">If you have more questions about transferring to Calvin, share a copy of your course transcript and we’ll work with you one-on-one to help make your transition as smooth as possible. 
+                    </p>
+                    <p>
+Current Calvin students: submit the <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://calvin.edu/sites/default/files/migrated/dotAsset-f5d9d113-a00c-45e1-8d31-3460f360df84.pdf" target="_blank">Transfer Credit Pre-Approval Form.</a></p>
+                    <div id="form_c2b76835-4762-4935-953c-baf7c0f22358" class="text-gray-700">
+                        Loading form...
                     </div>
+                        <div id="slate-script-container"></div>
+                </div>
                 `}
             </div>
         `;
@@ -534,15 +552,17 @@
     const IntroBanner = () => {
         return html`
         <div class="max-w-[80%] mx-auto mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6 sm:p-8 space-y-5 text-gray-700">
+            <h1 class="font-heading text-5xl">Pre-approved Transfer Courses</h1>
             <p class="text-base sm:text-lg leading-relaxed text-gray-900">
                 Use this tool to find pre-approved transfer equivalencies and see how courses may transfer to Calvin. Search for your school, select the courses you want to transfer to Calvin, and click <strong>Export PDF</strong> to download your list.
             </p>
             
             <div class="bg-gray-50 border-l-4 border-calvin-maroon p-4 rounded-r-md text-sm sm:text-base">
-                <span class="font-bold text-gray-900">If your school or courses are not in the list, we may still accept credit.</span> You can 
-                <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://admissions.calvin.edu/register/transfer-rfi">
-                    request a personalized credit evaluation for a more complete review.
-                </a>
+                <p class="font-bold text-gray-900 mb-2">If your school or courses are not in the list, we may still accept credit.</p>
+                <ul class="list-disc list-inside">
+                    <li>Potential transfer students: <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://admissions.calvin.edu/register/transfer-rfi" target="_blank">request a personalized credit evaluation</a> for a more complete review.</li>
+                    <li>Current Calvin students: submit the <a class="underline text-calvin-maroon hover:text-calvin-darkMaroon transition-colors ml-1" href="https://calvin.edu/sites/default/files/migrated/dotAsset-f5d9d113-a00c-45e1-8d31-3460f360df84.pdf" target="_blank">Transfer Credit Pre-Approval Form</a></li>
+                </ul>
             </div>
             
             <div>
@@ -552,6 +572,7 @@
                     <li>Select “Advanced Placement Tests” as the institution to see how AP test scores transfer.</li>
                 </ul>
             </div>
+            <${AboutTransferAccordion}/>
         </div>
         `;
     };
@@ -559,7 +580,7 @@
     // ==========================================
     // ABOUT TRANSFER COMPONENT
     // ==========================================
-    const AboutTransfer = () => {
+    const AboutTransferAccordion = () => {
         const [isOpen, setIsOpen] = useState(false);
 
         return html`
@@ -604,6 +625,7 @@
       const [search, setSearch] = useState("");
       const [cart, setCart] = useState(new Map());
       const [errorMsg, setErrorMsg] = useState("");
+      const isGlobalCourseSearch = !selectedInstId && search.trim().length > 0;
 
       // Load Institutions on Mount
       useEffect(() => {
@@ -633,14 +655,44 @@
 
         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-        const fetchGlobalCourses = async (search) => {
-            const response = await fetchWithRetry(
-                `${COURSE_NO_AUTH_API_URL}?Search=${encodeURIComponent(search)}`
-            );
+        const fetchGlobalCourses = async () => {
+            const cacheKey = `global_courses`;
+            const cachedRaw = localStorage.getItem(cacheKey);
+
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+
+                if (cached.data && isFresh(cached.timestamp)) {
+                    return cached.data;
+                }
+            }
+
+            const response = await fetchWithRetry(GLOBAL_COURSE_SEARCH_API_URL);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
             const result = await response.json();
+            const schools = result.response?.schools || result.schools || [];
 
-            return result.rules || [];
+            // Flatten schools[].rules[] into a single array of rule objects
+            const data = schools.flatMap(school =>
+                (school.rules || []).map(rule => ({
+                    ...rule,
+                    institution: school.institution || "",
+                    institution_ref_id: school.institution_ref_id || ""
+                }))
+            );
+
+            localStorage.setItem(
+                cacheKey,
+                JSON.stringify({
+                    data,
+                    timestamp: Date.now()
+                })
+            );
+
+            return data;
         };
 
         const fetchWithRetry = async (url, maxRetries = 3) => {
@@ -696,9 +748,6 @@
                 institution_ref_id: result.institution_ref_id || ""
             }));
 
-            // console.log(result)
-            // console.log(data)
-
             localStorage.setItem(
                 cacheKey,
                 JSON.stringify({
@@ -735,7 +784,7 @@
                 setErrorMsg("");
 
                 try {
-                    const data = await fetchGlobalCourses(search.trim());
+                    const data = await fetchGlobalCourses();
                     setCourses(data);
                 } catch (e) {
                     setErrorMsg("Error searching across institutions.");
@@ -755,18 +804,15 @@
     }, [selectedInstId, search]);
 
       // Live Filter
-        const filteredCourses = useMemo(() => {
-            // Global search was already filtered by Workato
-            if (!selectedInstId || !search.trim()) return courses;
-
+      const filteredCourses = useMemo(() => {
             const term = search.trim().toLowerCase();
+            if (!term) return courses;
 
             return courses.filter(c => {
                 const searchable = [
-                    c.external_courses?.[0]?.course_id,
-                    c.external_courses?.[0]?.course_title,
-                    c.internal_courses?.[0]?.course_id,
-                    c.internal_courses?.[0]?.course_title,
+                    c.institution,
+                    ...(c.external_courses || []).flatMap(item => [item.course_id, item.course_title]),
+                    ...(c.internal_courses || []).flatMap(item => [item.course_id, item.course_title]),
                     c.core_requirement
                 ]
                     .filter(Boolean)
@@ -775,7 +821,7 @@
 
                 return searchable.includes(term);
             });
-        }, [courses, search, selectedInstId]);
+        }, [courses, search]);
 
       const removeFromCart = (courseId) => {
         setCart(prev => {
@@ -802,6 +848,47 @@
       const totalCredits = useMemo(() => {
         return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 3), 0);
       }, [cart]);
+
+      // Determine the single status banner to show (null when cards should display normally)
+        const statusBanner = (() => {
+            if (loading || errorMsg) return null;
+
+            const trimmedSearch = search.trim();
+
+            // 1. Initial empty state (no institution and no search text)
+            if (!selectedInstId && trimmedSearch.length === 0) {
+                return {
+                    style: "bg-gray-100 text-gray-700 border-gray-200",
+                    text: "Search the transferring institution to begin."
+                };
+            }
+
+            // 2. Global search typed, but fewer than 3 characters
+            if (!selectedInstId && trimmedSearch.length < 3) {
+                return {
+                    style: "bg-gray-100 text-gray-700 border-gray-200",
+                    text: "Enter a search term to search across all institutions."
+                };
+            }
+
+            // 3. Institution selected, but API returned 0 courses for it
+            if (selectedInstId && courses.length === 0) {
+                return {
+                    style: "bg-yellow-50 text-yellow-800 border-yellow-200",
+                    text: "No transfer courses were returned for this institution."
+                };
+            }
+
+            // 4. Courses exist (from institution or global fetch), but search filter matched 0
+            if (filteredCourses.length === 0) {
+                return {
+                    style: "bg-yellow-50 text-yellow-800 border-yellow-200",
+                    text: `No transfer courses match "${trimmedSearch}".`
+                };
+            }
+
+            return null;
+        })();
 
       const handleExport = () => {
         if (cart.size === 0) {
@@ -830,19 +917,31 @@
         let rowsHtml = "";
         let index = 0;
         cart.forEach((course) => {
-          const ext = course.external_courses?.[0] || {};
-          const internal = course.internal_courses?.[0] || {};
+          const externalCourses = course.external_courses || [];
+          const internalCourses = course.internal_courses || [];
+          const externalHtml = externalCourses.length
+            ? externalCourses.map((ext, i) => `
+                <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
+                    <div style="font-size: 13px; font-weight: 700; color: #111827;">${ext.course_id || "External Course"}</div>
+                    <div style="font-size: 11px; color: #4b5563; margin-top: 2px; line-height: 1.35;">${ext.course_title || "Untitled External Course"}</div>
+                </div>
+              `).join("")
+            : '<div style="font-size: 11px; color: #6b7280;">No external course</div>';
+          const internalHtml = internalCourses.length
+            ? internalCourses.map((internal, i) => `
+                <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
+                    <div style="font-size: 13px; font-weight: 700; color: #8c2232;">${internal.course_id || "Calvin Equivalent"}</div>
+                    <div style="font-size: 11px; color: #1f2937; margin-top: 2px; line-height: 1.35; font-weight: 500;">${internal.course_title || "Equivalent Calvin Course"}</div>
+                    ${internal.is_core ? '<div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Fulfills Core Requirement</div>' : ''}
+                </div>
+              `).join("")
+            : '<div style="font-size: 11px; color: #6b7280;">No Calvin equivalent</div>';
           const bgClass = index % 2 === 0 ? "#ffffff" : "#fcfcfc";
 
           rowsHtml += `
                         <tr style="background-color: ${bgClass}; border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
                             <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                <div style="font-size: 13px; font-weight: 700; color: #111827;">
-                                    ${ext.course_id || "External Course"}
-                                </div>
-                                <div style="font-size: 11px; color: #4b5563; margin-top: 2px; line-height: 1.35;">
-                                    ${ext.course_title || "Untitled External Course"}
-                                </div>
+                                ${externalHtml}
                                 <div style="font-size: 10px; color: #8c2232; margin-top: 4px; font-weight: 600;">
                                     ${course.institution || "External Institution"}
                                 </div>
@@ -860,15 +959,7 @@
                             </td>
 
                             <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                <div style="font-size: 13px; font-weight: 700; color: #8c2232;">
-                                    ${internal.course_id || "Calvin Equivalent"}
-                                </div>
-                                <div style="font-size: 11px; color: #1f2937; margin-top: 2px; line-height: 1.35; font-weight: 500;">
-                                    ${internal.course_title || "Equivalent Calvin Course"}
-                                </div>
-                                <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">
-                                    ${internalCourse.is_core ? 'Fulfills Core Requirement' : ''}
-                                </div>
+                                ${internalHtml}
                             </td>
                         </tr>
                     `;
@@ -895,7 +986,7 @@
 
                     <div style="height: 4px; background-color: #f2cd14; margin-bottom: 20px;"></div>
                     <!-- Disclaimer Text -->
-                    <p class="mb-3">If your school or courses are not in the list, we may still accept credit. Visit calvin.edu/go/creditevaluation to share your transcript and get one-on-one help.</p>
+                    <p class="mb-3"><strong>Have questions?</strong> Email <a href="mailto:registrar@calvin.edu">registrar@calvin.edu</a> and we’ll work with you one-on-one to help make your transition as smooth as possible. </p>
 
                     <!-- Evaluation Table -->
                     <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
@@ -939,7 +1030,14 @@
           pagebreak: { mode: ["avoid-all", "css", "legacy"] }
         };
 
-        html2pdf().set(options).from(printContainer).save();
+        if (typeof window.html2pdf !== "function") {
+          alert("PDF export library failed to load. Please refresh the page and try again.");
+          return;
+        }
+        window.html2pdf().set(options).from(printContainer).save().catch(error => {
+          console.error("PDF export failed:", error);
+          alert("The PDF could not be generated. Please try again.");
+        });
       };
 
       return html`
@@ -950,40 +1048,52 @@
                     <main class="flex-1 max-w-[120rem] mx-auto w-full px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                         <!-- Left Sidebar -->
-                        
-                        <div class="lg:col-span-3 space-y-6 bg-white border border-gray-200 rounded-xl shadow-sm p-5 space-y-5">
-                        <${AboutTransfer} />
+                        <div class="lg:col-span-3">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 space-y-5 sticky top-8">
+                                <div>
+                                    <label class="block font-bold text-gray-800 mb-2 text-sm">Institution Search:</label>
+                                    <${InstitutionAutocomplete}
+                                        institutions=${institutions}
+                                        selectedId=${selectedInstId}
+                                        onChange=${setSelectedInstId}
+                                        disabled=${isGlobalCourseSearch}
+                                    />
+                                </div>
 
-                            <div>
-                                <label class="block font-bold text-gray-800 mb-2 text-sm">Institution Search:</label>
-                                <${InstitutionAutocomplete}
-                                    institutions=${institutions}
-                                    selectedId=${selectedInstId}
-                                    onChange=${setSelectedInstId}
-                                />
+                                <!-- Always Visible Course Search -->
+                                <div>
+                                    <label for="course-search" class="block font-bold text-gray-800 mb-2 text-sm">Course Search:</label>
+                                    <input
+                                        type="text"
+                                        id="course-search"
+                                        placeholder=${selectedInstId ? "Search within institution..." : "Global course search..."}
+                                        class="w-full bg-white border border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-calvin-maroon focus:ring focus:ring-calvin-maroon/20 py-2 px-3 text-sm transition-colors"
+                                        value=${search}
+                                        onInput=${e => {
+                                            const inputValue = e.target.value;
+                                            if (inputValue.trim() && selectedInstId) {
+                                                setSelectedInstId("");
+                                            }
+                                            setSearch(inputValue);
+                                        }}
+                                    />
+                                </div>
+
+                                <hr class="border-gray-200" />
+
+                                <button
+                                    type="button"
+                                    class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm"
+                                    onClick=${() => {
+                                        setSearch("");
+                                        setSelectedInstId("");
+                                        setCourses([]);
+                                        setErrorMsg("");
+                                    }}
+                                >
+                                    Reset <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
                             </div>
-
-                            <!-- Always Visible Course Search -->
-                            <div>
-                                <label for="course-search" class="block font-bold text-gray-800 mb-2 text-sm">Course Search:</label>
-                                <input
-                                    type="text"
-                                    id="course-search"
-                                    placeholder=${selectedInstId ? "Search within institution..." : "Global course search..."}
-                                    class="w-full bg-white border border-gray-300 text-gray-900 rounded-md shadow-sm focus:border-calvin-maroon focus:ring focus:ring-calvin-maroon/20 py-2 px-3 text-sm transition-colors"
-                                    value=${search}
-                                    onInput=${e => setSearch(e.target.value)}
-                                />
-                            </div>
-
-                            <hr class="border-gray-200" />
-
-                            <button class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm" onClick=${e => {
-                                setSearch("");
-                            }}>
-                                Reset
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
                         </div>
 
                         <!-- Main Content Area -->
@@ -998,17 +1108,21 @@
                                 </div>
                                 <p class="text-sm text-gray-500 text-center">Loading courses...</p>
                             ` : html`
-                                ${selectedInstId && courses.length === 0 && !errorMsg ? html`
-                                    <div class="bg-yellow-50 text-yellow-800 p-4 rounded-md border border-yellow-200 mb-4 text-sm">
-                                        No transfer courses were returned for this institution.
+                                ${statusBanner ? html`
+                                    <div class=${`p-4 rounded-md border mb-4 text-sm ${statusBanner.style}`}>
+                                        ${statusBanner.text}
                                     </div>
-                                ` : html`<div class="bg-gray-100 p-4 rounded-md border border-gray-200 mb-4 text-sm">Search the transferring institution to begin.</div>`}
+                                ` : html`
+                                    <div class="text-xs text-gray-500 font-medium mb-3">
+                                        Showing ${filteredCourses.length} ${filteredCourses.length === 1 ? "course" : "courses"}
+                                    </div>
+                                `}
 
                                 <div class="space-y-4">
-                                    ${filteredCourses.map((course, index) => {
-        const courseId = getCourseKey(course);
-        return html`<${CourseCard} key=${courseId} course=${course} inCart=${cart.has(courseId)} onToggleCart=${toggleCart} />`;
-      })}
+                                    ${filteredCourses.map((course) => {
+                                        const courseId = getCourseKey(course);
+                                        return html`<${CourseCard} key=${courseId} course=${course} inCart=${cart.has(courseId)} onToggleCart=${toggleCart} />`;
+                                    })}
                                 </div>
                             `}
                         </div>
