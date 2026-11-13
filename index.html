@@ -46,8 +46,13 @@
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
         <!-- PDF Export Library -->
+        <!-- <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script> -->
+        <!-- PDF Export Libraries (Vector jsPDF + AutoTable) -->
         <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
         <!-- Import Map for ESM Preact -->
         <script type="importmap">
@@ -846,7 +851,7 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
         };
 
       const totalCredits = useMemo(() => {
-        return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 3), 0);
+        return Array.from(cart.values()).reduce((sum, c) => sum + Number(c.credit_hours || 0), 0);
       }, [cart]);
 
       // Determine the single status banner to show (null when cards should display normally)
@@ -891,155 +896,424 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
         })();
 
       const handleExport = () => {
-        if (cart.size === 0) {
-          alert("Please select at least one course before exporting.");
-          return;
+    if (cart.size === 0) {
+        alert("Please select at least one course before exporting.");
+        return;
+    }
+
+    if (!window.jspdf?.jsPDF) {
+        alert("PDF export library failed to load. Please refresh the page and try again.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "portrait" });
+
+    const pageWidth = doc.internal.pageSize.getWidth();   // 612 pt
+    const pageHeight = doc.internal.pageSize.getHeight(); // 792 pt
+    const marginX = 32;
+    const contentWidth = pageWidth - marginX * 2;
+
+    // Calvin Brand Palette matching your HTML template
+    const MAROON = [140, 34, 50];        // #8c2232
+    const GOLD = [242, 205, 20];         // #f2cd14
+    const CHARCOAL = [40, 40, 40];       // #282828
+    const DARK_TEXT = [17, 24, 39];      // #111827
+    const BODY_TEXT = [31, 41, 55];      // #1f2937
+    const MUTED_TEXT = [75, 85, 99];     // #4b5563
+    const SUBTLE_TEXT = [107, 114, 128]; // #6b7280
+    const LIGHT_BG = [249, 250, 251];    // #f9fafb
+    const ZEBRA_BG = [252, 252, 252];    // #fcfcfc
+    const BORDER = [229, 231, 235];      // #e5e7eb
+    const BADGE_BG = [254, 243, 199];    // #fef3c7
+    const BADGE_BORDER = [253, 230, 138];// #fde68a
+    const BADGE_TEXT = [146, 64, 14];    // #92400e
+
+    const dateStr = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+    const instList = Array.from(
+        new Set(Array.from(cart.values()).map(c => c.institution || "External Institution"))
+    ).join(", ");
+
+    // ==========================================
+    // 1. HEADER BANNER (Matches HTML Top Bar)
+    // ==========================================
+    const headerTop = 28;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    const metaText = `Date Generated: ${dateStr}\nEvaluated Institutions: ${instList}`;
+    const metaLines = doc.splitTextToSize(metaText, contentWidth * 0.44);
+    const headerHeight = Math.max(60, metaLines.length * 12 + 28);
+
+    // Maroon header card
+    doc.setFillColor(...MAROON);
+    doc.roundedRect(marginX, headerTop, contentWidth, headerHeight, 5, 5, "F");
+
+    // Square off bottom corners before gold stripe
+    doc.rect(marginX, headerTop + headerHeight - 6, contentWidth, 6, "F");
+
+    // Gold accent bar
+    doc.setFillColor(...GOLD);
+    doc.rect(marginX, headerTop + headerHeight, contentWidth, 4, "F");
+
+    // Left title
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(19);
+    doc.text("CALVIN UNIVERSITY", marginX + 16, headerTop + 26);
+
+    doc.setTextColor(...GOLD);
+    doc.setFontSize(9.5);
+    doc.text("Registrar's Office — Transfer Credit Evaluation Summary", marginX + 16, headerTop + 42);
+
+    // Right metadata
+    doc.setTextColor(243, 244, 246);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(metaLines, pageWidth - marginX - 16, headerTop + 22, { align: "right" });
+
+    // ==========================================
+    // 2. INTRO / CONTACT LINE
+    // ==========================================
+    let currentY = headerTop + headerHeight + 20;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK_TEXT);
+    const prefix = "Have questions? Email registrar@calvin.edu";
+    doc.text(prefix, marginX, currentY);
+
+    const prefixWidth = doc.getTextWidth(prefix);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...BODY_TEXT);
+    const restText = " and we'll work with you one-on-one to help make your transition as smooth as possible.";
+    const restLines = doc.splitTextToSize(restText, contentWidth - prefixWidth);
+    doc.text(restLines[0], marginX + prefixWidth, currentY);
+    if (restLines.length > 1) {
+        const overflow = doc.splitTextToSize(restLines.slice(1).join(" "), contentWidth);
+        doc.text(overflow, marginX, currentY + 12);
+        currentY += overflow.length * 12;
+    }
+    currentY += 16;
+
+    // ==========================================
+    // 3. CUSTOM CELL RENDERING HELPERS
+    // ==========================================
+    const sortedCourses = Array.from(cart.values()).sort((a, b) =>
+        (a.institution || "").localeCompare(b.institution || "")
+    );
+
+    const col0Width = contentWidth * 0.40;
+    const col1Width = contentWidth * 0.20;
+    const col2Width = contentWidth * 0.40;
+    const padX = 10;
+    const padY = 9;
+
+    // Measure & draw External Course cell (bold code, gray title, maroon institution)
+    const processExternalCell = (course, cellWidth, draw = false, x = 0, y = 0) => {
+        const innerW = cellWidth - padX * 2;
+        const extCourses = course.external_courses?.length
+            ? course.external_courses
+            : [{ course_id: "External Course", course_title: "No external course" }];
+
+        let cursorY = y + padY;
+
+        extCourses.forEach((ext, idx) => {
+            if (idx > 0) {
+                cursorY += 5;
+                if (draw) {
+                    doc.setDrawColor(...BORDER);
+                    doc.setLineWidth(0.5);
+                    doc.line(x + padX, cursorY, x + cellWidth - padX, cursorY);
+                }
+                cursorY += 7;
+            }
+
+            // Bold course ID
+            doc.setFont("Fjalla One", "bold");
+            doc.setFontSize(9.5);
+            const idLines = doc.splitTextToSize(ext.course_id || "External Course", innerW);
+            if (draw) {
+                doc.setTextColor(...DARK_TEXT);
+                doc.text(idLines, x + padX, cursorY + 8);
+            }
+            cursorY += idLines.length * 11.5 + 1;
+
+            // Regular gray course title
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8.5);
+            const titleLines = doc.splitTextToSize(ext.course_title || "Untitled External Course", innerW);
+            if (draw) {
+                doc.setTextColor(...MUTED_TEXT);
+                doc.text(titleLines, x + padX, cursorY + 7);
+            }
+            cursorY += titleLines.length * 10.5;
+        });
+
+        // Maroon institution footer inside cell
+        cursorY += 4;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        const instLines = doc.splitTextToSize(course.institution || "External Institution", innerW);
+        if (draw) {
+            doc.setTextColor(...MAROON);
+            doc.text(instLines, x + padX, cursorY + 7);
+        }
+        cursorY += instLines.length * 10 + padY;
+
+        return cursorY - y;
+    };
+
+    // Measure & draw Status & Credits cell (amber core badge + centered credits)
+    const processStatusCell = (course, cellWidth, cellHeight = 0, draw = false, x = 0, y = 0) => {
+        const innerW = cellWidth - padX * 2;
+        const credits = Number.isFinite(Number(course.credit_hours)) ? Number(course.credit_hours) : 0;
+        const creditText = `${credits} ${credits === 1 ? "Credit" : "Credits"}`;
+
+        let badgeLines = [];
+        let badgeBoxH = 0;
+        if (course.core_requirement) {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7.5);
+            badgeLines = doc.splitTextToSize(course.core_requirement, innerW - 10);
+            badgeBoxH = badgeLines.length * 9.5 + 6;
         }
 
-        const printContainer = document.createElement("div");
-        printContainer.style.width = "750px";
-        printContainer.style.padding = "24px 28px";
-        printContainer.style.fontFamily = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
-        printContainer.style.color = "#282828";
-        printContainer.style.backgroundColor = "#ffffff";
+        const totalContentH = badgeBoxH + (badgeBoxH ? 6 : 0) + 11;
+        // Vertically center content when drawing
+        let cursorY = draw && cellHeight > totalContentH
+            ? y + (cellHeight - totalContentH) / 2
+            : y + padY;
 
-        const dateStr = new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric"
-        });
+        if (course.core_requirement) {
+            if (draw) {
+                const badgeW = innerW;
+                doc.setFillColor(...BADGE_BG);
+                doc.setDrawColor(...BADGE_BORDER);
+                doc.setLineWidth(0.5);
+                doc.roundedRect(x + padX, cursorY, badgeW, badgeBoxH, 2.5, 2.5, "FD");
 
-        
-        const instSet = new Set();
-        cart.forEach(c => instSet.add(c.institution || "External Institution"));
-        const instList = Array.from(instSet).join(", ");
-        
-        let rowsHtml = "";
-        let index = 0;
-        cart.forEach((course) => {
-          const externalCourses = course.external_courses || [];
-          const internalCourses = course.internal_courses || [];
-          const externalHtml = externalCourses.length
-            ? externalCourses.map((ext, i) => `
-                <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
-                    <div style="font-size: 13px; font-weight: 700; color: #111827;">${ext.course_id || "External Course"}</div>
-                    <div style="font-size: 11px; color: #4b5563; margin-top: 2px; line-height: 1.35;">${ext.course_title || "Untitled External Course"}</div>
-                </div>
-              `).join("")
-            : '<div style="font-size: 11px; color: #6b7280;">No external course</div>';
-          const internalHtml = internalCourses.length
-            ? internalCourses.map((internal, i) => `
-                <div style="${i ? 'margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;' : ''}">
-                    <div style="font-size: 13px; font-weight: 700; color: #8c2232;">${internal.course_id || "Calvin Equivalent"}</div>
-                    <div style="font-size: 11px; color: #1f2937; margin-top: 2px; line-height: 1.35; font-weight: 500;">${internal.course_title || "Equivalent Calvin Course"}</div>
-                    ${internal.is_core ? '<div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Fulfills Core Requirement</div>' : ''}
-                </div>
-              `).join("")
-            : '<div style="font-size: 11px; color: #6b7280;">No Calvin equivalent</div>';
-          const bgClass = index % 2 === 0 ? "#ffffff" : "#fcfcfc";
-
-          rowsHtml += `
-                        <tr style="background-color: ${bgClass}; border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
-                            <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                ${externalHtml}
-                                <div style="font-size: 10px; color: #8c2232; margin-top: 4px; font-weight: 600;">
-                                    ${course.institution || "External Institution"}
-                                </div>
-                            </td>
-
-                            <td style="padding: 12px 10px; vertical-align: top; text-align: center; width: 20%;">
-                                ${course.core_requirement ? `
-                                    <div style="display: block; margin-top: 4px; font-size: 9px; font-weight: 600; color: #92400e; background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 3px; padding: 2px 4px;">
-                                        ${course.core_requirement}
-                                    </div>
-                                ` : ''}
-                                <div style="font-size: 11px; color: #6b7280; font-weight: 600; margin-top: 6px;">
-                                    ${course.credit_hours || 3} Credits
-                                </div>
-                            </td>
-
-                            <td style="padding: 12px 14px; vertical-align: top; width: 40%;">
-                                ${internalHtml}
-                            </td>
-                        </tr>
-                    `;
-          index++;
-        });
-
-        // PDF LAYOUT
-        printContainer.innerHTML = `
-                    <!-- Header Bar -->
-                    <div style="background-color: #8c2232; padding: 18px 22px; border-radius: 6px 6px 0 0; color: #ffffff; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-family: 'Fjalla One', Arial, sans-serif; font-size: 24px; letter-spacing: 0.5px; text-transform: uppercase;">
-                                Calvin University
-                            </div>
-                            <div style="font-size: 12px; color: #f2cd14; font-weight: 600; margin-top: 2px;">
-                                Registrar's Office — Transfer Credit Evaluation Summary
-                            </div>
-                        </div>
-                        <div style="text-align: right; font-size: 10px; color: #f3f4f6; line-height: 1.4;">
-                            <div><strong>Date Generated:</strong> ${dateStr}</div>
-                            <div><strong>Evaluated Institutions:</strong> ${instList}</div>
-                        </div>
-                    </div>
-
-                    <div style="height: 4px; background-color: #f2cd14; margin-bottom: 20px;"></div>
-                    <!-- Disclaimer Text -->
-                    <p class="mb-3"><strong>Have questions?</strong> Email <a href="mailto:registrar@calvin.edu">registrar@calvin.edu</a> and we’ll work with you one-on-one to help make your transition as smooth as possible. </p>
-
-                    <!-- Evaluation Table -->
-                    <table style="width: 100%; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
-                        <thead>
-                            <tr style="background-color: #282828; color: #ffffff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <th style="padding: 10px 14px; text-align: left; font-weight: 700; width: 40%;">Transferring Course</th>
-                                <th style="padding: 10px 10px; text-align: center; font-weight: 700; width: 20%;">Status & Credits</th>
-                                <th style="padding: 10px 14px; text-align: left; font-weight: 700; width: 40%;">Calvin University Equivalent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
-
-                    <!-- Summary & Official Disclaimer Footer -->
-                    <div style="page-break-inside: avoid; background-color: #f9fafb; border: 1px solid #e5e7eb; border-left: 4px solid #8c2232; border-radius: 4px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
-                        <div style="max-width: 65%;">
-                            <div style="font-size: 11px; font-weight: 700; color: #8c2232; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
-                                Official Evaluation Notice
-                            </div>
-                            <div style="font-size: 10px; color: #4b5563; line-height: 1.45;">
-                                This evaluation is an preliminary guide. Transfer credits remain subject to official transcript verification and review by the Calvin University Registrar's Office.
-                            </div>
-                        </div>
-                        <div style="text-align: right; border-left: 1px solid #d1d5db; padding-left: 16px;">
-                            <div style="font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Selected Courses</div>
-                            <div style="font-size: 16px; font-weight: 800; color: #111827; margin-bottom: 2px;">${cart.size}</div>
-                            <div style="font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase;">Total Transfer Credits</div>
-                            <div style="font-size: 18px; font-weight: 800; color: #8c2232;">${totalCredits}</div>
-                        </div>
-                    </div>
-                `;
-
-        const options = {
-          margin: [0.3, 0.3, 0.3, 0.3],
-          filename: "Calvin-Transfer-Credit-Evaluation.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, scrollY: 0, useCORS: true },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] }
-        };
-
-        if (typeof window.html2pdf !== "function") {
-          alert("PDF export library failed to load. Please refresh the page and try again.");
-          return;
+                doc.setTextColor(...BADGE_TEXT);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(7.5);
+                doc.text(badgeLines, x + cellWidth / 2, cursorY + 9.5, { align: "center" });
+            }
+            cursorY += badgeBoxH + 6;
         }
-        window.html2pdf().set(options).from(printContainer).save().catch(error => {
-          console.error("PDF export failed:", error);
-          alert("The PDF could not be generated. Please try again.");
-        });
-      };
 
+        if (draw) {
+            doc.setTextColor(...SUBTLE_TEXT);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(8.5);
+            doc.text(creditText, x + cellWidth / 2, cursorY + 8, { align: "center" });
+        }
+        cursorY += 11 + padY;
+
+        return cursorY - y;
+    };
+
+    // Measure & draw Calvin Equivalent cell (bold maroon ID, dark title, core note)
+    const processInternalCell = (course, cellWidth, draw = false, x = 0, y = 0) => {
+        const innerW = cellWidth - padX * 2;
+        const intCourses = course.internal_courses?.length
+            ? course.internal_courses
+            : [{ course_id: "Calvin Equivalent", course_title: "No Calvin equivalent" }];
+
+        let cursorY = y + padY;
+
+        intCourses.forEach((internal, idx) => {
+            if (idx > 0) {
+                cursorY += 5;
+                if (draw) {
+                    doc.setDrawColor(...BORDER);
+                    doc.setLineWidth(0.5);
+                    doc.line(x + padX, cursorY, x + cellWidth - padX, cursorY);
+                }
+                cursorY += 7;
+            }
+
+            // Bold maroon Calvin course ID
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9.5);
+            const idLines = doc.splitTextToSize(internal.course_id || "Calvin Equivalent", innerW);
+            if (draw) {
+                doc.setTextColor(...MAROON);
+                doc.text(idLines, x + padX, cursorY + 8);
+            }
+            cursorY += idLines.length * 11.5 + 1;
+
+            // Medium-dark course title
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8.5);
+            const titleLines = doc.splitTextToSize(internal.course_title || "Equivalent Calvin Course", innerW);
+            if (draw) {
+                doc.setTextColor(...BODY_TEXT);
+                doc.text(titleLines, x + padX, cursorY + 7);
+            }
+            cursorY += titleLines.length * 10.5;
+
+            // Core requirement sub-note
+            if (internal.is_core) {
+                cursorY += 3;
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(7.5);
+                if (draw) {
+                    doc.setTextColor(...SUBTLE_TEXT);
+                    doc.text("Fulfills Core Requirement", x + padX, cursorY + 6);
+                }
+                cursorY += 9;
+            }
+        });
+
+        cursorY += padY;
+        return cursorY - y;
+    };
+
+    // ==========================================
+    // 4. RENDER AUTO-PAGINATING STYLED TABLE
+    // ==========================================
+    doc.autoTable({
+        startY: currentY,
+        margin: { left: marginX, right: marginX, bottom: 46 },
+        head: [["TRANSFERRING COURSE", "STATUS & CREDITS", "CALVIN UNIVERSITY EQUIVALENT"]],
+        body: sortedCourses.map(() => ["", "", ""]),
+        theme: "plain",
+        headStyles: {
+            fillColor: CHARCOAL,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 8,
+            cellPadding: { top: 8, bottom: 8, left: padX, right: padX }
+        },
+        columnStyles: {
+            0: { cellWidth: col0Width },
+            1: { cellWidth: col1Width, halign: "center" },
+            2: { cellWidth: col2Width }
+        },
+        // Pre-compute exact row height from our custom rich content
+        didParseCell: (data) => {
+            if (data.section === "head" && data.column.index === 1) {
+                data.cell.styles.halign = "center";
+            }
+            if (data.section === "body") {
+                const course = sortedCourses[data.row.index];
+                const h0 = processExternalCell(course, col0Width, false);
+                const h1 = processStatusCell(course, col1Width, 0, false);
+                const h2 = processInternalCell(course, col2Width, false);
+                data.cell.styles.minCellHeight = Math.max(h0, h1, h2);
+            }
+        },
+        // Draw zebra background, bottom border, and styled multi-font text
+        didDrawCell: (data) => {
+            if (data.section !== "body") return;
+
+            const course = sortedCourses[data.row.index];
+            const { x, y, width, height } = data.cell;
+
+            // Zebra striping matching #ffffff / #fcfcfc
+            doc.setFillColor(...(data.row.index % 2 === 0 ? [255, 255, 255] : ZEBRA_BG));
+            doc.rect(x, y, width, height, "F");
+
+            // Outer left/right border & bottom row border
+            doc.setDrawColor(...BORDER);
+            doc.setLineWidth(0.5);
+            doc.line(x, y + height, x + width, y + height);
+            if (data.column.index === 0) {
+                doc.line(x, y, x, y + height);
+            }
+            if (data.column.index === 2) {
+                doc.line(x + width, y, x + width, y + height);
+            }
+
+            // Render styled cell content
+            if (data.column.index === 0) {
+                processExternalCell(course, width, true, x, y);
+            } else if (data.column.index === 1) {
+                processStatusCell(course, width, height, true, x, y);
+            } else if (data.column.index === 2) {
+                processInternalCell(course, width, true, x, y);
+            }
+        }
+    });
+
+    // ==========================================
+    // 5. OFFICIAL EVALUATION NOTICE & TOTALS BOX
+    // ==========================================
+    let finalY = doc.lastAutoTable.finalY + 18;
+    const footerBoxHeight = 68;
+
+    if (finalY + footerBoxHeight > pageHeight - 40) {
+        doc.addPage();
+        finalY = 36;
+    }
+
+    doc.setFillColor(...LIGHT_BG);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.75);
+    doc.roundedRect(marginX, finalY, contentWidth, footerBoxHeight, 4, 4, "FD");
+
+    // Left maroon accent bar
+    doc.setFillColor(...MAROON);
+    doc.rect(marginX, finalY, 4, footerBoxHeight, "F");
+
+    // Notice text
+    doc.setTextColor(...MAROON);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.text("OFFICIAL EVALUATION NOTICE", marginX + 14, finalY + 18);
+
+    doc.setTextColor(...MUTED_TEXT);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    const disclaimerLines = doc.splitTextToSize(
+        "This evaluation is a preliminary guide. Transfer credits remain subject to official transcript verification and review by the Calvin University Registrar's Office.",
+        contentWidth * 0.62
+    );
+    doc.text(disclaimerLines, marginX + 14, finalY + 31);
+
+    // Vertical divider
+    const dividerX = marginX + contentWidth * 0.69;
+    doc.setDrawColor(209, 213, 219);
+    doc.setLineWidth(0.75);
+    doc.line(dividerX, finalY + 10, dividerX, finalY + footerBoxHeight - 10);
+
+    // Right totals
+    const rightX = pageWidth - marginX - 14;
+    doc.setTextColor(...SUBTLE_TEXT);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.text("TOTAL SELECTED COURSES", rightX, finalY + 17, { align: "right" });
+
+    doc.setTextColor(...DARK_TEXT);
+    doc.setFontSize(12);
+    doc.text(String(cart.size), rightX, finalY + 30, { align: "right" });
+
+    doc.setTextColor(...SUBTLE_TEXT);
+    doc.setFontSize(7.5);
+    doc.text("TOTAL TRANSFER CREDITS", rightX, finalY + 45, { align: "right" });
+
+    doc.setTextColor(...MAROON);
+    doc.setFontSize(13.5);
+    doc.text(String(totalCredits), rightX, finalY + 59, { align: "right" });
+
+    // ==========================================
+    // 6. PAGE NUMBERS
+    // ==========================================
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(156, 163, 175);
+        doc.text(`Page ${i} of ${totalPages}`, pageWidth - marginX, pageHeight - 20, { align: "right" });
+    }
+
+    const fileDate = new Date().toISOString().slice(0, 10);
+    doc.save(`Calvin-Transfer-Credit-Evaluation-${fileDate}.pdf`);
+};
       return html`
                 <div class="min-h-screen flex flex-col">
                     <${Header} />
@@ -1164,16 +1438,29 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
                                 <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg flex justify-between items-center font-bold text-gray-900 text-sm">
                                     <span>Total Credits:</span>
                                     <span class="bg-gray-200 text-gray-800 text-xs px-2.5 py-1 rounded-full">${totalCredits}</span>
+                                    </div>
+                                    
+                                    <div class="flex">
+                                        <button
+                                        type="button"
+                                        onClick=${handleExport}
+                                        class="w-full flex-1 items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 shadow-sm transition-colors text-sm "
+                                        >
+                                        <i class="bi bi-file-earmark-pdf text-base"></i> Export PDF
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            class="text-calvin-maroon hover:text-calvin-darkMaroon font-medium text-sm flex-1 border-2 border-calvin-maroon py-2.5 px-4 transition-colors"
+                                            onClick=${() => {
+                                                setCart(new Map());
+                                            }}
+                                        >
+                                            Reset <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 
-                                <button
-                                type="button"
-                                onClick=${handleExport}
-                                class="w-full flex items-center justify-center gap-2 bg-calvin-maroon hover:bg-calvin-darkMaroon text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors text-sm "
-                                >
-                                <i class="bi bi-file-earmark-pdf text-base"></i> Export PDF
-                                </button>
-                                </div>
                         </div>
 
                         </main>
