@@ -630,7 +630,7 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
       const [search, setSearch] = useState("");
       const [cart, setCart] = useState(new Map());
       const [errorMsg, setErrorMsg] = useState("");
-      const isGlobalCourseSearch = !selectedInstId && search.trim().length > 0;
+      const isGlobalCourseSearch = selectedInstId.length == 0 && search.trim().length > 0;
 
       // Load Institutions on Mount
       useEffect(() => {
