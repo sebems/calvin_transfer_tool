@@ -630,7 +630,7 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
       const [search, setSearch] = useState("");
       const [cart, setCart] = useState(new Map());
       const [errorMsg, setErrorMsg] = useState("");
-      const isGlobalCourseSearch = selectedInstId.length == 0 && search.trim().length > 0;
+      const [isGlobalCourseSearch, setIsGlobalCourseSearch] = useState(false);
 
       // Load Institutions on Mount
       useEffect(() => {
@@ -1345,8 +1345,10 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
                                         value=${search}
                                         onInput=${e => {
                                             const inputValue = e.target.value;
-                                            if (inputValue.trim() && selectedInstId) {
-                                                setSelectedInstId("");
+                                            if (inputValue.trim() && !selectedInstId) {
+                                                setIsGlobalCourseSearch(true);
+                                            } else if (!inputValue.trim()) {
+                                                setIsGlobalCourseSearch(false);
                                             }
                                             setSearch(inputValue);
                                         }}
@@ -1361,6 +1363,7 @@ Current Calvin students: submit the <a class="underline text-calvin-maroon hover
                                     onClick=${() => {
                                         setSearch("");
                                         setSelectedInstId("");
+                                        setIsGlobalCourseSearch(false);
                                         setCourses([]);
                                         setErrorMsg("");
                                     }}
